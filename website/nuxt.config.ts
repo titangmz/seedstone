@@ -13,7 +13,8 @@ export default defineNuxtConfig({
         { name: 'theme-color', content: '#07080f' },
       ],
       link: [
-        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+        // favicon is set dynamically by plugins/gem-favicon.client.ts
+        { rel: 'icon', type: 'image/png', href: '/favicon.ico' },
       ],
     },
   },

@@ -108,9 +108,10 @@ export class LuminaRenderer {
 
     // ── WebGL renderer ────────────────────────────────────────────────────────
     this.renderer = new THREE.WebGLRenderer({
-      antialias:        true,
-      alpha:            bg === null,
-      powerPreference:  'high-performance',
+      antialias:            true,
+      alpha:                bg === null,
+      powerPreference:      'high-performance',
+      preserveDrawingBuffer: true,
     });
     this.renderer.setPixelRatio(options.pixelRatio ?? Math.min(window.devicePixelRatio, 2));
     this.renderer.setSize(width, height);

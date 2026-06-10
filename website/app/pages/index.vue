@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 
+// ── Shared gem seed state ─────────────────────────────────────────────────────
+const activeSeed = useActiveSeed()
+
 // ── SEO ───────────────────────────────────────────────────────────────────────
 useSeoMeta({
   title:       'Lumina Gem — Every string is a unique gemstone',
@@ -15,8 +18,7 @@ const QUICK_PICKS   = ['hello world', '0x1a2b3c', 'stardust', 'ultraviolet', 'mi
 const FACET_LABELS: Record<number, string> = { 6: 'Hexagonal', 7: 'Heptagonal', 8: 'Octagonal' }
 
 // ── State ─────────────────────────────────────────────────────────────────────
-const inputValue = ref('lumina')
-const activeSeed = ref('lumina')
+const inputValue = ref(activeSeed.value)
 const dna        = ref<Record<string, unknown> | null>(null)
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -39,8 +41,9 @@ const dnaPills = computed(() => {
 
 // ── Actions ───────────────────────────────────────────────────────────────────
 function renderSeed(s: string) {
-  activeSeed.value = s.trim() || 'lumina'
-  inputValue.value = activeSeed.value
+  const seed = s.trim() || 'lumina'
+  activeSeed.value = seed
+  inputValue.value  = seed
 }
 
 function onRenderClick()           { renderSeed(inputValue.value) }
