@@ -14,6 +14,7 @@ const STAR_BLINK_SCALE  = 300;    // converts speed → visible blink frequency
 
 const GALLERY_SIZE_PX   = 180;    // px — width/height of each gallery gem canvas
 const GALLERY_BG_COLOR  = 0x07080f; // matches CSS --bg
+
 const DEBOUNCE_MS       = 420;    // live preview debounce while typing
 
 const GALLERY_SEEDS = [

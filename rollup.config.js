@@ -7,43 +7,26 @@ const banner = `/**
  * MIT License
  */`;
 
+// Three.js is bundled into every output — no peer dependency required.
+const sharedPlugins = [resolve(), typescript({ tsconfig: './tsconfig.json' })];
+
 export default [
-  // ESM build (tree-shakeable, for bundlers) — Three.js is external
+  // ESM build — tree-shakeable, for bundlers
   {
-    input: 'src/index.ts',
-    output: {
-      file:      'dist/lumina-gem.esm.js',
-      format:    'esm',
-      banner,
-      sourcemap: true,
-    },
-    external: ['three'],
-    plugins: [resolve(), typescript({ tsconfig: './tsconfig.json' })],
+    input:   'src/index.ts',
+    output:  { file: 'dist/lumina-gem.esm.js', format: 'esm', banner, sourcemap: true },
+    plugins: sharedPlugins,
   },
-  // UMD build (for bundlers / Node) — Three.js is external
+  // UMD build — for CommonJS / legacy bundlers
   {
-    input: 'src/index.ts',
-    output: {
-      file:      'dist/lumina-gem.umd.js',
-      format:    'umd',
-      name:      'LuminaGem',
-      banner,
-      sourcemap: true,
-      globals:   { three: 'THREE' },
-    },
-    external: ['three'],
-    plugins: [resolve(), typescript({ tsconfig: './tsconfig.json' }), terser()],
+    input:   'src/index.ts',
+    output:  { file: 'dist/lumina-gem.umd.js', format: 'umd', name: 'LuminaGem', banner, sourcemap: true },
+    plugins: [...sharedPlugins, terser()],
   },
-  // Standalone IIFE build (bundles Three.js) — for demo / CDN <script> tag
+  // IIFE build — single <script> tag, no setup required
   {
-    input: 'src/index.ts',
-    output: {
-      file:      'dist/lumina-gem.standalone.js',
-      format:    'iife',
-      name:      'LuminaGem',
-      banner,
-      sourcemap: false,
-    },
-    plugins: [resolve(), typescript({ tsconfig: './tsconfig.json' }), terser()],
+    input:   'src/index.ts',
+    output:  { file: 'dist/lumina-gem.standalone.js', format: 'iife', name: 'LuminaGem', banner },
+    plugins: [...sharedPlugins, terser()],
   },
 ];

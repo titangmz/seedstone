@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>lumina-gem — minimal</title>
+  <style>
+    body { margin: 0; background: #09090f; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    #gem { width: 400px; height: 400px; }
+  </style>
+</head>
+<body>
+  <div id="gem"></div>
+
+  <script src="../dist/lumina-gem.standalone.js"></script>
+  <script>
+    const { LuminaRenderer } = window.LuminaGem;
+    new LuminaRenderer('hello', { container: document.getElementById('gem') });
+  </script>
+</body>
+</html>
