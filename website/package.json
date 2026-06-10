@@ -1,0 +1,19 @@
+{
+  "name": "seedstone-website",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "seedstone": "file:..",
+    "@vercel/speed-insights": "^2.0.0",
+    "nuxt": "npm:nuxt-nightly@5x",
+    "vue": "^3.5.35",
+    "vue-router": "^5.1.0"
+  }
+}

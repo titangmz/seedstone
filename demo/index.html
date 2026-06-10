@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>seedstone demo</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      background: #07080f;
+      color: #e8e8f0;
+      font-family: system-ui, sans-serif;
+    }
+    #gem { width: 360px; height: 360px; }
+    input {
+      width: 280px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #3a3a55;
+      background: #14152230;
+      color: inherit;
+      font-size: 1rem;
+      outline: none;
+      text-align: center;
+    }
+    p { color: #777; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <div id="gem"></div>
+  <input id="seed" value="alice" autocomplete="off" spellcheck="false" />
+  <p>Type any string — the same string always produces the same gem.</p>
+
+  <!-- Build the library first: npm install && npm run build -->
+  <script src="../dist/seedstone.standalone.js"></script>
+  <script>
+    const { SeedstoneRenderer } = window.Seedstone;
+    const input = document.getElementById('seed');
+
+    const gem = new SeedstoneRenderer(input.value, {
+      container: document.getElementById('gem'),
+    });
+
+    input.addEventListener('input', () => gem.update(input.value));
+  </script>
+</body>
+</html>
