@@ -1,0 +1,28 @@
+// https://nuxt.com/docs/api/configuration/nuxt-config
+export default defineNuxtConfig({
+  compatibilityDate: '2024-11-01',
+  devtools: { enabled: true },
+
+   css: ['~/assets/css/main.css'],
+
+  app: {
+    head: {
+      htmlAttrs: { lang: 'en' },
+      meta: [
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+        { name: 'theme-color', content: '#07080f' },
+      ],
+      link: [
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+      ],
+    },
+  },
+
+  // lumina-gem uses Three.js + WebGL — keep it client-side only
+  // (components that use it are already wrapped in <ClientOnly>)
+  vite: {
+    optimizeDeps: {
+      include: ['lumina-gem'],
+    },
+  },
+})

@@ -2,11 +2,32 @@
 
 Render a beautiful 3D rotating gemstone from any string. Same string always produces the same gem.
 
-## Build from source
+## Repo structure
+
+```
+lumina-gem/
+├── src/          # Library source (TypeScript)
+├── dist/         # Built library output (published to npm)
+├── demo/         # Minimal standalone HTML demo
+│   └── minimal.html
+└── website/      # Nuxt marketing/docs site (separate package, not published to npm)
+```
+
+The library (`/`) and the website (`/website`) are **independent packages** — `npm install` in the root only installs library build tools. The website has its own `node_modules` and never affects the published package.
+
+## Library — build from source
 
 ```sh
 npm install
 npm run build   # outputs to dist/
+```
+
+## Website — local dev
+
+```sh
+cd website
+npm install
+npm run dev
 ```
 ## Usage
 
