@@ -2,21 +2,12 @@
 
 Render a beautiful 3D rotating gemstone from any string. Same string always produces the same gem.
 
-## Install
-
-```sh
-npm install lumina-gem
-```
-
-No other dependencies required — Three.js is bundled.
-
 ## Build from source
 
 ```sh
 npm install
 npm run build   # outputs to dist/
 ```
-
 ## Usage
 
 The input string is the **gem seed** — any string you like. The same string always

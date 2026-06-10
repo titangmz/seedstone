@@ -1,9 +1,9 @@
 import resolve   from '@rollup/plugin-node-resolve';
 import typescript from '@rollup/plugin-typescript';
-import { terser } from 'rollup-plugin-terser';
+import terser from '@rollup/plugin-terser';
 
 const banner = `/**
- * lumina-gem v1.0.0 — https://github.com/lumina-gem
+ * lumina-gem v1.0.0 — https://github.com/titangmz/lumina-gem
  * MIT License
  */`;
 
