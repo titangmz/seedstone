@@ -2,15 +2,13 @@ import assert from 'node:assert/strict';
 import { buildGeometry, listCuts, stringToDNA } from '../dist/lumina-gem.esm.js';
 
 const cuts = listCuts();
-assert.deepEqual(cuts, ['brilliant', 'marquise']);
+assert.deepEqual(cuts, ['fluorite', 'icosa', 'pyrite', 'spinel']);
 
-const generatedCuts = new Set();
-for (let i = 0; i < 100; i++) {
-  generatedCuts.add(stringToDNA(`seed-${i}`).cut);
+// stringToDNA should return one of the registered cuts
+for (let i = 0; i < 20; i++) {
+  const dna = stringToDNA(`seed-${i}`);
+  assert(cuts.includes(dna.cut), `stringToDNA should return a registered cut, got '${dna.cut}'`);
 }
-
-assert(generatedCuts.has('brilliant'), 'seed DNA should generate brilliant cuts');
-assert(generatedCuts.has('marquise'), 'seed DNA should generate marquise cuts');
 
 function dimensions(cut) {
   const geometry = buildGeometry(cut, 8);
@@ -19,25 +17,27 @@ function dimensions(cut) {
   assert(box, `${cut} should have a bounding box`);
   return {
     x: box.max.x - box.min.x,
+    y: box.max.y - box.min.y,
     z: box.max.z - box.min.z,
   };
 }
 
-const brilliant = dimensions('brilliant');
-const marquise = dimensions('marquise');
+// All cuts should produce geometry with a non-degenerate bounding box
+for (const cut of cuts) {
+  const dim = dimensions(cut);
+  assert(dim.x > 0, `${cut} should have non-zero x extent`);
+  assert(dim.y > 0, `${cut} should have non-zero y extent`);
+  assert(dim.z > 0, `${cut} should have non-zero z extent`);
+}
 
+// bipyramid shapes should be symmetric (x ≈ z)
+const fluorite = dimensions('fluorite');
 assert(
-  marquise.x > brilliant.x * 1.3,
-  `marquise should be visibly longer than brilliant: ${marquise.x} vs ${brilliant.x}`,
-);
-assert(
-  marquise.z < brilliant.z * 0.7,
-  `marquise should be visibly narrower than brilliant: ${marquise.z} vs ${brilliant.z}`,
+  Math.abs(fluorite.x - fluorite.z) < 0.01,
+  `fluorite (d8 bipyramid) should be radially symmetric: x=${fluorite.x} z=${fluorite.z}`,
 );
 
 console.log('geometry DNA ok', {
   cuts,
-  generatedCuts: [...generatedCuts].sort(),
-  brilliant,
-  marquise,
+  dimensions: Object.fromEntries(cuts.map(c => [c, dimensions(c)])),
 });

@@ -1,9 +1,9 @@
-import { buildPlatonicSolid } from './lib/platonic';
+import { buildDiceGeometry } from './lib/dice';
 import type { GemCutModule } from './index';
 
 // Fluorite cleaves along octahedral planes — d8.
 const mod: GemCutModule = {
   name: 'fluorite',
-  build: () => buildPlatonicSolid(8),
+  build: () => buildDiceGeometry(8),
 };
 export default mod;
