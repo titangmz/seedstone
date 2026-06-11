@@ -56,7 +56,7 @@ export type GemCut = string;
  * Falls back to `'brilliant'` if the cut name is unrecognised.
  */
 export function buildGeometry(cut: GemCut, facets: number): THREE.BufferGeometry {
-  const mod = GEM_CUTS.get(cut) ?? GEM_CUTS.get('brilliant')!;
+  const mod = GEM_CUTS.get(cut) ?? GEM_CUTS.values().next().value!;
   return mod.build(facets);
 }
 

@@ -22,8 +22,15 @@ export default defineNuxtConfig({
   // lumina-gem uses Three.js + WebGL — keep it client-side only
   // (components that use it are already wrapped in <ClientOnly>)
   vite: {
+    resolve: {
+      alias: {
+        // Point directly at the dist file so Vite watches it and picks up
+        // rollup rebuilds immediately, instead of using a stale pre-bundle.
+        'lumina-gem': new URL('../dist/lumina-gem.esm.js', import.meta.url).pathname,
+      },
+    },
     optimizeDeps: {
-      include: ['lumina-gem'],
+      exclude: ['lumina-gem'],
     },
   },
 })
