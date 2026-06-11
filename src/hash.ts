@@ -3,6 +3,8 @@
  * Same input always produces the exact same gemstone.
  */
 
+import { listCuts } from './geometries/index';
+
 // ── djb2 hash ─────────────────────────────────────────────────────────────────
 
 function djb2(str: string): number {
@@ -24,7 +26,7 @@ export function derive(str: string, index: number): number {
   return (djb2(str + '\x00' + index) % 1_000_000) / 1_000_000;
 }
 
-// Supported radial facet counts for the brilliant cut.
+// Supported radial facet counts.
 const FACET_CHOICES = [6, 7, 8] as const;
 
 // ── DNA types ─────────────────────────────────────────────────────────────────
@@ -36,6 +38,8 @@ export interface GemDNA {
   saturation: number;
   /** Radial facet count: 6 | 7 | 8 */
   facets:     6 | 7 | 8;
+  /** Gem cut shape, e.g. 'brilliant' | 'marquise' */
+  cut:        string;
   /** Rotation speed multiplier */
   speed:      number;
   /** Slight Z-axis tilt in radians */
@@ -54,14 +58,17 @@ export interface GemDNA {
 
 /**
  * Convert any string into a fully-specified `GemDNA`.
- * Empty string falls back to the word `'lumina'`.
+ * @param str       Input seed — empty string falls back to `'lumina'`.
+ * @param cutNames  Sorted list of available cut names. Defaults to the geometry registry.
  */
-export function stringToDNA(str: string): GemDNA {
+export function stringToDNA(str: string, cutNames: string[] = listCuts()): GemDNA {
   const s = str.length === 0 ? 'lumina' : str;
+  const cuts = cutNames.length > 0 ? cutNames : ['brilliant'];
   return {
     hue:        derive(s, 0) * 360,
     saturation: 0.55 + derive(s, 1) * 0.45,
     facets:     FACET_CHOICES[Math.floor(derive(s, 2) * 3)],
+    cut:        cuts[Math.floor(derive(s, 8) * cuts.length)],
     speed:      0.6  + derive(s, 3) * 0.8,
     tilt:       (derive(s, 4) - 0.5) * 0.4,
     light1Hue:  derive(s, 5) * 360,

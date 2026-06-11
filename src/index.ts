@@ -10,5 +10,6 @@ export type { LuminaOptions }              from './renderer';
 export { stringToDNA, derive }             from './hash';
 export type { GemDNA }                     from './hash';
 
-export { buildGeometry, listCuts, buildBrilliantGeometry } from './geometries/index';
+export { buildGeometry, listCuts }          from './geometries/index';
+export { buildBrilliantGeometry }           from './geometries/brilliant';
 export type { GemCut }                     from './geometries/index';

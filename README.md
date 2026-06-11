@@ -69,7 +69,7 @@ new LuminaRenderer(input: string, options: LuminaOptions)
 | `width` | `number` | container width | Canvas width in px. |
 | `height` | `number` | container height | Canvas height in px. |
 | `background` | `string \| number \| null` | `null` | Background colour, or `null` for transparent. |
-| `cut` | `GemCut` | `'brilliant'` | Geometry cut style. |
+| `cut` | `GemCut` | DNA-selected | Optional geometry cut override. |
 | `autoRotate` | `boolean` | `true` | Start rotating on construction. |
 | `pixelRatio` | `number` | `devicePixelRatio` | Canvas pixel ratio. |
 
@@ -83,9 +83,9 @@ gem.dna                    // read-only: the GemDNA derived from the input strin
 
 ## Adding a new geometry
 
-1. Create `src/geometries/<name>.ts` exporting `build<Name>Geometry(facets: number)`.
-2. Register it in `src/geometries/index.ts` — add to `GEM_CUTS` and extend the `GemCut` union.
-3. Pass `cut: '<name>'` to `LuminaRenderer`.
+1. Create `src/geometries/<name>.ts`.
+2. Export a default `GemCutModule` with a unique `name` and a `build(facets)` function.
+3. Build normally. The registry auto-discovers the file, and the DNA system can select it.
 
 ## Demo
 

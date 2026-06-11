@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { buildGeometry, GemCut } from './geometries/index';
+import { buildGeometry, GemCut, listCuts } from './geometries/index';
 import { stringToDNA, GemDNA } from './hash';
 
 // ── Renderer constants ────────────────────────────────────────────────────────
@@ -54,7 +54,7 @@ export interface LuminaOptions {
   height?: number;
   /** Background colour (CSS string, hex number, or null for transparent). Default: null */
   background?: string | number | null;
-  /** Gem cut style. Default: 'brilliant' */
+  /** Optional cut override. Defaults to the deterministic DNA-selected cut. */
   cut?: GemCut;
   /** Auto-start rotation on construction. Default: true */
   autoRotate?: boolean;
@@ -96,7 +96,12 @@ export class LuminaRenderer {
   private destroyed      = false;
 
   constructor(input: string, options: LuminaOptions) {
-    this.dna = stringToDNA(input);
+    const cuts = listCuts();
+    const dna = stringToDNA(input, cuts);
+    this.dna = {
+      ...dna,
+      cut: options.cut && cuts.includes(options.cut) ? options.cut : dna.cut,
+    };
 
     const container = options.container;
     if (!container) throw new Error('[lumina-gem] options.container is required.');
@@ -104,7 +109,6 @@ export class LuminaRenderer {
     const width  = options.width  ?? (container.clientWidth  || 400);
     const height = options.height ?? (container.clientHeight || 400);
     const bg     = options.background !== undefined ? options.background : null;
-    const cut    = options.cut ?? 'brilliant';
 
     // ── WebGL renderer ────────────────────────────────────────────────────────
     this.renderer = new THREE.WebGLRenderer({
@@ -136,7 +140,7 @@ export class LuminaRenderer {
     this._buildEnvMap();
 
     // ── Gem ───────────────────────────────────────────────────────────────────
-    this._buildGem(cut);
+    this._buildGem();
 
     // ── Lights ────────────────────────────────────────────────────────────────
     this._buildLights();
@@ -217,13 +221,13 @@ export class LuminaRenderer {
    *   - iridescence → thin-film colour shift (prismatic "fire")
    *   - NO clearcoat → clearcoat adds a second Fresnel layer which looks plastic
    */
-  private _buildGem(cut: GemCut): void {
+  private _buildGem(): void {
     // Medium lightness base — env map + point lights provide contrast and drama
     const gemColor = new THREE.Color().setHSL(this.dna.hue / 360, this.dna.saturation * 0.75, 0.45);
     // Deep saturated tint: colours light that passes through the gem interior
     const attColor = new THREE.Color().setHSL(this.dna.hue / 360, 1.0, 0.28);
 
-    const geo = buildGeometry(cut, this.dna.facets);
+    const geo = buildGeometry(this.dna.cut, this.dna.facets);
     const mat = new THREE.MeshPhysicalMaterial({
       color:                     gemColor,
       metalness:                 0.0,

@@ -30,6 +30,7 @@ const dnaPills = computed(() => {
   if (!dna.value) return []
   const d = dna.value as any
   return [
+    { label: `Cut ${String(d.cut ?? 'brilliant')}`,                    color: 'rgba(255,255,255,0.08)' },
     { label: `Hue ${Math.round(d.hue)}°`,                             color: hueToCSS(d.hue) },
     { label: `Sat ${Math.round(d.saturation * 100)}%`,                color: 'rgba(255,255,255,0.06)' },
     { label: FACET_LABELS[d.facets] ?? `${d.facets} facets`,          color: 'rgba(255,255,255,0.06)' },

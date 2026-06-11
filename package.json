@@ -4,12 +4,13 @@
   "description": "Render a beautiful 3D rotating gem from any string",
   "main": "dist/lumina-gem.umd.js",
   "module": "dist/lumina-gem.esm.js",
-  "types": "dist/src/index.d.ts",
+  "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
     "build": "rollup -c",
+    "test": "node test/geometry-dna.test.mjs",
     "dev": "concurrently -n lib,web -c magenta,cyan \"rollup -c -w\" \"npm run dev --prefix website\"",
     "dev:lib": "rollup -c -w",
     "website:dev": "npm run dev --prefix website",

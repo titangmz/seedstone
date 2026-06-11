@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import type { GemCutModule } from './index';
 
 /**
  * Brilliant-cut gem geometry (round brilliant / diamond silhouette).
@@ -129,3 +130,7 @@ export function buildBrilliantGeometry(facets: number = 8): THREE.BufferGeometry
   geo.setAttribute('uv',       new THREE.Float32BufferAttribute(uvs,       2));
   return geo;
 }
+
+// ── Registry contract ─────────────────────────────────────────────────────────
+const mod: GemCutModule = { name: 'brilliant', build: buildBrilliantGeometry };
+export default mod;
