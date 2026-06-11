@@ -11,5 +11,4 @@ export { stringToDNA, derive }             from './hash';
 export type { GemDNA }                     from './hash';
 
 export { buildGeometry, listCuts }          from './geometries/index';
-export { buildBrilliantGeometry }           from './geometries/brilliant';
 export type { GemCut }                     from './geometries/index';
