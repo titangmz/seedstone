@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { buildGeometry, listCuts, stringToDNA } from '../dist/lumina-gem.esm.js';
 
 const cuts = listCuts();
-assert.deepEqual(cuts, ['fluorite', 'icosa', 'pyrite', 'spinel']);
+assert.deepEqual(cuts, ['dodecahedron', 'fluorite', 'hexahedron', 'icosa', 'icosahedron', 'pyrite', 'spinel']);
 
 // stringToDNA should return one of the registered cuts
 for (let i = 0; i < 20; i++) {
