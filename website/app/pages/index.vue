@@ -37,9 +37,16 @@ function onGalleryPick({ seed, overrides }: { seed: string; overrides: Record<st
   <div class="page">
 
     <header class="header">
+      <div class="header-eyebrow">
+        <span class="eyebrow-rule" /><span class="eyebrow-text">3D gem renderer</span><span class="eyebrow-rule reverse" />
+      </div>
       <h1>✦ Lumina Gem</h1>
-      <p>Every string is a unique gemstone</p>
-      <span class="badge">WebGL · Three.js · MeshPhysical</span>
+      <p class="header-sub">Every string is a unique gemstone</p>
+      <div class="tech-stack">
+        <span class="tech-badge">WebGL</span>
+        <span class="tech-badge">Three.js</span>
+        <span class="tech-badge">MeshPhysical</span>
+      </div>
     </header>
 
     <div class="content">
@@ -125,33 +132,75 @@ function onGalleryPick({ seed, overrides }: { seed: string; overrides: Record<st
 
 /* ── Header ─────────────────────────────────────────────────────────────────── */
 .header {
+  width: 100%;
   text-align: center;
-  margin-bottom: 36px;
+  margin-bottom: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
 }
+
+.header-eyebrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+.eyebrow-text {
+  font-size: 0.67rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(167,139,250,0.45);
+  white-space: nowrap;
+}
+.eyebrow-rule {
+  display: block;
+  width: 48px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(167,139,250,0.35));
+}
+.eyebrow-rule.reverse {
+  background: linear-gradient(90deg, rgba(167,139,250,0.35), transparent);
+}
+
 .header h1 {
-  font-size: clamp(2rem, 4vw, 3rem);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  background: linear-gradient(135deg, #e0c3fc 0%, #a78bfa 40%, #60a5fa 80%, #c084fc 100%);
+  font-size: clamp(2.6rem, 5.5vw, 4rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  background: linear-gradient(135deg, #f3e8ff 0%, #c084fc 28%, #818cf8 58%, #e879f9 82%, #f5d0fe 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  filter: drop-shadow(0 0 28px rgba(167,139,250,0.5));
-  margin-bottom: 8px;
+  filter: drop-shadow(0 0 48px rgba(192,132,252,0.5));
+  margin: 0;
 }
-.header p { color: var(--muted); font-size: 1rem; }
-.badge {
-  display: inline-block;
-  margin-top: 10px;
-  padding: 3px 12px;
+.header-sub {
+  font-size: 1rem;
+  color: rgba(255,255,255,0.38);
+  letter-spacing: 0.015em;
+  margin: 0;
+}
+
+.tech-stack {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.tech-badge {
+  padding: 4px 14px;
   border-radius: 100px;
-  background: rgba(167,139,250,0.12);
-  border: 1px solid rgba(167,139,250,0.3);
-  font-size: 0.7rem;
+  background: rgba(167,139,250,0.08);
+  border: 1px solid rgba(167,139,250,0.18);
+  font-size: 0.69rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: rgba(167,139,250,0.65);
 }
 
 /* ── Shared-width wrapper ────────────────────────────────────────────────────── */
