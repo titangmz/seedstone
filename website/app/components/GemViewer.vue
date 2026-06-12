@@ -1,43 +1,47 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onBeforeUnmount, useTemplateRef } from 'vue'
 
-// ── Props ─────────────────────────────────────────────────────────────────────
 const props = defineProps<{ seed: string; overrides?: Record<string, unknown> }>()
+const emit  = defineEmits<{ dna: [dna: Record<string, unknown>] }>()
 
-// ── Emits ─────────────────────────────────────────────────────────────────────
-const emit = defineEmits<{ dna: [dna: Record<string, unknown>] }>()
-
-// ── State ─────────────────────────────────────────────────────────────────────
 const containerRef = useTemplateRef<HTMLDivElement>('container')
 const loading      = ref(true)
 
-let gem: any    = null
+let gem:      any = null
 let Renderer: any = null
-let ro: ResizeObserver | null = null
+let ro:       ResizeObserver | null = null
+// Counter to cancel superseded async mount calls
+let mountId = 0
 
 async function mount(seed: string) {
+  const id = ++mountId
   if (!containerRef.value) return
-  gem?.destroy()
-  gem = null
-  loading.value = true
 
+  // Lazy-load the library once
   if (!Renderer) {
-    // Dynamic import keeps lumina-gem (Three.js) out of the SSR bundle
     const mod = await import('lumina-gem')
+    if (id !== mountId) return   // a newer call already took over
     Renderer = mod.LuminaRenderer
   }
 
-  const size = containerRef.value.clientWidth || 500
-  requestAnimationFrame(() => {
-    gem = new Renderer(seed, props.overrides ?? {}, {
-      container:  containerRef.value!,
-      width:      size,
-      height:     size,
-      background: null,
-    })
-    loading.value = false
+  // Reuse the existing WebGL context — no destroy/recreate, no new context
+  if (gem) {
+    gem.update(seed, props.overrides ?? {})
     emit('dna', gem.dna as Record<string, unknown>)
+    return
+  }
+
+  // First mount: create the renderer
+  loading.value = true
+  const size = containerRef.value.clientWidth || 420
+  gem = new Renderer(seed, props.overrides ?? {}, {
+    container:  containerRef.value,
+    width:      size,
+    height:     size,
+    background: null,
   })
+  loading.value = false
+  emit('dna', gem.dna as Record<string, unknown>)
 }
 
 onMounted(() => {
@@ -76,7 +80,6 @@ onBeforeUnmount(() => {
   height: min(420px, 90vw);
 }
 
-/* Glow ring behind gem */
 .gem-wrap::before {
   content: '';
   position: absolute;
@@ -100,7 +103,6 @@ onBeforeUnmount(() => {
   position: relative;
 }
 
-/* Loading spinner */
 .spinner {
   position: absolute;
   inset: 0;

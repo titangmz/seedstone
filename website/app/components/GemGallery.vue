@@ -1,54 +1,85 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 
-// ── Emits ─────────────────────────────────────────────────────────────────────
-const emit = defineEmits<{
+const props = defineProps<{ count?: number }>()
+const emit  = defineEmits<{
   pick: [{ seed: string; overrides: Record<string, unknown> }]
 }>()
 
-// ── Types ─────────────────────────────────────────────────────────────────────
 interface GalleryItem {
   seed:      string
   label:     string
   overrides: Record<string, unknown>
 }
 
-// ── State ─────────────────────────────────────────────────────────────────────
-const SIZE  = 180
-const BG    = 0x07080f
-const items = ref<GalleryItem[]>([])
+const BG         = 0x07080f
+const STAGGER_MS = 80
 
-// Gems keyed by cut name so we can destroy them on unmount
-const gems = new Map<string, unknown>()
+const items      = ref<GalleryItem[]>([])
+const gems       = new Map<string, unknown>()
+let ioObs: IntersectionObserver | null = null
+let roObs: ResizeObserver | null = null
 
-// ── Mount / unmount ───────────────────────────────────────────────────────────
 onMounted(async () => {
-  // Dynamic import keeps lumina-gem (Three.js) out of the SSR bundle entirely
   const { LuminaRenderer, listCuts } = await import('lumina-gem')
 
-  items.value = (listCuts() as string[]).map((cut) => ({
-    seed:      cut,
-    label:     cut,
-    overrides: { cut },
-  }))
+  const cuts    = listCuts() as string[]
+  const visible = props.count != null ? cuts.slice(0, props.count) : cuts
+  items.value   = visible.map((cut) => ({ seed: cut, label: cut, overrides: { cut } }))
 
-  // Wait for Vue to render the list, then mount each gem
   await nextTick()
-  document.querySelectorAll<HTMLDivElement>('[data-gem-cut]').forEach((el) => {
-    const cut  = el.dataset.gemCut!
-    const item = items.value.find((i) => i.label === cut)
-    if (!item) return
-    gems.get(cut)?.destroy()
-    gems.set(cut, new LuminaRenderer(item.seed, item.overrides, {
-      container:  el,
-      width:      SIZE,
-      height:     SIZE,
-      background: BG,
-    }))
+
+  // Pause/play gems as they scroll in and out of view
+  ioObs = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        const gem = gems.get((entry.target as HTMLDivElement).dataset.gemCut!) as any
+        if (!gem) return
+        entry.isIntersecting ? gem.play() : gem.pause()
+      })
+    },
+    { threshold: 0.1 }
+  )
+
+  // Keep canvas resolution in sync with its display size
+  roObs = new ResizeObserver((entries) => {
+    entries.forEach((entry) => {
+      const el  = entry.target as HTMLDivElement
+      const gem = gems.get(el.dataset.gemCut!) as any
+      if (!gem) return
+      const s = el.clientWidth
+      gem.resize(s, s)
+    })
+  })
+
+  const els = Array.from(document.querySelectorAll<HTMLDivElement>('[data-gem-cut]'))
+  els.forEach((el, i) => {
+    setTimeout(() => {
+      const cut  = el.dataset.gemCut!
+      const item = items.value.find((x) => x.label === cut)
+      if (!item || !el.isConnected) return
+
+      ;(gems.get(cut) as any)?.destroy?.()
+
+      // Use the element's actual rendered width so the canvas is never upscaled
+      const s = el.clientWidth || 180
+      gems.set(cut, new LuminaRenderer(item.seed, item.overrides, {
+        container:  el,
+        width:      s,
+        height:     s,
+        background: BG,
+        targetFPS:  24,
+      }))
+
+      ioObs!.observe(el)
+      roObs!.observe(el)
+    }, i * STAGGER_MS)
   })
 })
 
 onBeforeUnmount(() => {
+  ioObs?.disconnect()
+  roObs?.disconnect()
   gems.forEach((g: any) => g?.destroy())
   gems.clear()
 })
@@ -65,10 +96,7 @@ onBeforeUnmount(() => {
         :title="`View ${item.label}`"
         @click="emit('pick', { seed: item.seed, overrides: item.overrides })"
       >
-        <div
-          class="gallery-gem-wrap"
-          :data-gem-cut="item.label"
-        />
+        <div class="gallery-gem-wrap" :data-gem-cut="item.label" />
         <div class="gallery-label">{{ item.label }}</div>
       </div>
     </div>
@@ -96,7 +124,7 @@ onBeforeUnmount(() => {
   grid-template-columns: repeat(2, 1fr);
   gap: 18px;
 }
-@media (min-width: 600px) {
+@media (min-width: 480px) {
   .gallery-grid { grid-template-columns: repeat(4, 1fr); }
 }
 
@@ -132,5 +160,4 @@ onBeforeUnmount(() => {
   text-align: center;
   font-family: 'Consolas', 'SF Mono', monospace;
 }
-
 </style>

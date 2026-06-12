@@ -102,7 +102,7 @@ function onGalleryPick({ seed, overrides }: { seed: string; overrides: Record<st
 
       <!-- ── Gallery ─────────────────────────────────────────────────────── -->
       <ClientOnly>
-        <GemGallery @pick="onGalleryPick" />
+        <GemGallery :count="4" @pick="onGalleryPick" />
       </ClientOnly>
 
       <!-- ── Footer ──────────────────────────────────────────────────────── -->
