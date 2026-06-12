@@ -10,9 +10,10 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "seedstone": "file:..",
+    "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "nuxt": "npm:nuxt-nightly@5x",
+    "seedstone": "file:..",
     "vue": "^3.5.35",
     "vue-router": "^5.1.0"
   }

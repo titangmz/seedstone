@@ -3,7 +3,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
 
-  modules: ['@vercel/speed-insights/nuxt'],
+  modules: ['@vercel/speed-insights/nuxt', '@vercel/analytics'],
 
   css: ['~/assets/css/main.css'],
 
