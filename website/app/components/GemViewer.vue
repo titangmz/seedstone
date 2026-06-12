@@ -72,8 +72,8 @@ onBeforeUnmount(() => {
 <style scoped>
 .gem-wrap {
   position: relative;
-  width: min(500px, 90vw);
-  height: min(500px, 90vw);
+  width: min(420px, 90vw);
+  height: min(420px, 90vw);
 }
 
 /* Glow ring behind gem */

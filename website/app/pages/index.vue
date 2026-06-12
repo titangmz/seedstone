@@ -156,7 +156,7 @@ function onGalleryPick({ seed, overrides }: { seed: string; overrides: Record<st
 /* ── Shared-width content wrapper ───────────────────────────────────────────── */
 .content {
   width: 100%;
-  max-width: 1160px;
+  max-width: 1300px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -172,13 +172,13 @@ function onGalleryPick({ seed, overrides }: { seed: string; overrides: Record<st
   gap: 24px;
 }
 
-@media (min-width: 1000px) {
+@media (min-width: 960px) {
   .hero {
     display: grid;
-    /* 1fr 500px 1fr always sums to exactly containerWidth → perfect alignment */
-    grid-template-columns: 0.7fr 500px 1.3fr;
+    /* input fixed-narrow · gem · genome takes all remaining space */
+    grid-template-columns: 1fr 420px 1fr;
     align-items: start;
-    gap: 28px;
+    gap: 24px;
   }
 }
 
@@ -187,7 +187,7 @@ function onGalleryPick({ seed, overrides }: { seed: string; overrides: Record<st
   width: 100%;
   max-width: 560px;
 }
-@media (min-width: 1000px) {
+@media (min-width: 960px) {
   .hero-left { max-width: none; }
 }
 
@@ -203,7 +203,7 @@ function onGalleryPick({ seed, overrides }: { seed: string; overrides: Record<st
   width: 100%;
   max-width: 560px;
 }
-@media (min-width: 1000px) {
+@media (min-width: 960px) {
   .hero-right {
     max-width: none;
     align-self: stretch;
