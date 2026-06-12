@@ -24,8 +24,12 @@ async function mount(seed: string) {
     Renderer = mod.LuminaRenderer
   }
 
-  // Reuse the existing WebGL context — no destroy/recreate, no new context
+  // Reuse the existing WebGL context — no destroy/recreate, no new context.
+  // Yield one rAF so gallery renders complete their current frame before we
+  // run the synchronous geometry build (which would otherwise block them).
   if (gem) {
+    await new Promise<void>(r => requestAnimationFrame(() => r()))
+    if (id !== mountId) return   // a newer call superseded this one
     gem.update(seed, props.overrides ?? {})
     emit('dna', gem.dna as Record<string, unknown>)
     return
@@ -56,8 +60,9 @@ onMounted(() => {
   ro.observe(containerRef.value!)
 })
 
-watch(() => props.seed,     (s) => mount(s))
-watch(() => props.overrides, () => mount(props.seed))
+// Single combined watch — seed and overrides often change together (renderSeed),
+// so one watcher avoids calling mount() twice per gallery pick.
+watch([() => props.seed, () => props.overrides], () => mount(props.seed))
 
 onBeforeUnmount(() => {
   gem?.destroy()

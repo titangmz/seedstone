@@ -296,7 +296,9 @@ export class LuminaRenderer {
     mat.attenuationColor.setHSL(this.dna.hue / 360, 1.0, 0.28);
     mat.ior         = this.dna.ior;
     mat.iridescence = this.dna.brilliance;
-    mat.needsUpdate = true;
+    // Do NOT set mat.needsUpdate — we only changed uniform values (Color, float),
+    // not shader defines. needsUpdate forces Three.js to re-run initMaterial()
+    // which re-validates all ~40 uniforms and causes a visible hitch.
     this.gemMesh.rotation.z = this.dna.tilt;
 
     // ── Lights: update colors and speeds in-place ─────────────────────────
