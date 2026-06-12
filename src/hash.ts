@@ -52,6 +52,14 @@ export interface GemDNA {
   ior:        number;
   /** Iridescence / fire intensity 0.3–1.0 */
   brilliance: number;
+  /** Gem quality: 0 = heavily distorted, 1 = flawless */
+  perfection: number;
+  /** Per-axis scale seeds (0–1 raw), interpreted by distort module */
+  scaleX:     number;
+  scaleY:     number;
+  scaleZ:     number;
+  /** Seed for vertex noise directions (0–1 raw) */
+  noiseSeed:  number;
 }
 
 // ── Factory ───────────────────────────────────────────────────────────────────
@@ -77,5 +85,10 @@ export function stringToDNA(str: string, cutNames: string[] = listCuts()): GemDN
     light2Hue:  (derive(s, 5) * 360 + 120) % 360,
     ior:        1.8  + derive(s, 6) * 1.0,
     brilliance: 0.3  + derive(s, 7) * 0.7,
+    perfection: derive(s, 9),
+    scaleX:     derive(s, 10),
+    scaleY:     derive(s, 11),
+    scaleZ:     derive(s, 12),
+    noiseSeed:  derive(s, 13),
   };
 }

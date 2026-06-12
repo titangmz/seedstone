@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { buildGeometry, GemCut, listCuts } from './geometries/index';
+import { applyDistortions } from './geometries/lib/distort';
 import { stringToDNA, GemDNA } from './hash';
 
 // ── Renderer constants ────────────────────────────────────────────────────────
@@ -228,6 +229,7 @@ export class LuminaRenderer {
     const attColor = new THREE.Color().setHSL(this.dna.hue / 360, 1.0, 0.28);
 
     const geo = buildGeometry(this.dna.cut, this.dna.facets);
+    applyDistortions(geo, this.dna);
     const mat = new THREE.MeshPhysicalMaterial({
       color:                     gemColor,
       metalness:                 0.0,
