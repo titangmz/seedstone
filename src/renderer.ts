@@ -68,6 +68,8 @@ export class LuminaRenderer {
   private clock:       THREE.Clock;
   private frameMin:    number;       // minimum ms between renders (FPS cap)
   private lastFrame:   number = 0;
+  private pendingGeo:  THREE.BufferGeometry | null = null; // built off-frame, swapped before next render
+  private updateSeq:   number = 0;  // monotone counter — stale idle callbacks bail out early
   dna:                 GemDNA;
   private animFrameId: number | null = null;
   private destroyed    = false;
@@ -252,6 +254,17 @@ export class LuminaRenderer {
       if (this.frameMin > 0 && now - this.lastFrame < this.frameMin) return;
       this.lastFrame = now;
 
+      // Swap in geometry that was built off-frame (requestIdleCallback).
+      // Disposal is deferred two rAFs so in-flight GPU draw calls using the
+      // old buffers have time to complete before the driver frees them.
+      if (this.pendingGeo) {
+        const oldGeo = this.gemMesh.geometry;
+        this.gemMesh.geometry   = this.pendingGeo;
+        this.wireframe.geometry = this.pendingGeo;
+        this.pendingGeo = null;
+        requestAnimationFrame(() => requestAnimationFrame(() => oldGeo.dispose()));
+      }
+
       const t = this.clock.getElapsedTime();
       this.gemMesh.rotation.y = t * this.dna.speed * 0.4;
       this.gemMesh.rotation.x = Math.sin(t * 0.3) * 0.12 + this.dna.tilt;
@@ -282,23 +295,15 @@ export class LuminaRenderer {
     const merged = { ...base, ...overrides };
     this.dna     = { ...merged, cut: cuts.includes(merged.cut) ? merged.cut : base.cut };
 
-    // ── Geometry: replace buffer data, reuse mesh & material objects ──────
-    const newGeo = buildGeometry(this.dna.cut, this.dna.facets);
-    applyDistortions(newGeo, this.dna);
-    const oldGeo         = this.gemMesh.geometry;
-    this.gemMesh.geometry    = newGeo;
-    this.wireframe.geometry  = newGeo;   // shares same geometry
-    oldGeo.dispose();
-
     // ── Material: update uniforms in-place — no shader recompilation ──────
+    // Color/float changes are just JS property writes; Three.js uploads them
+    // as uniforms on the next render call. No needsUpdate — that would force
+    // Three.js to re-run initMaterial() and re-validate ~40 uniforms.
     const mat = this.gemMesh.material as THREE.MeshPhysicalMaterial;
     mat.color.setHSL(this.dna.hue / 360, this.dna.saturation * 0.75, 0.45);
     mat.attenuationColor.setHSL(this.dna.hue / 360, 1.0, 0.28);
     mat.ior         = this.dna.ior;
     mat.iridescence = this.dna.brilliance;
-    // Do NOT set mat.needsUpdate — we only changed uniform values (Color, float),
-    // not shader defines. needsUpdate forces Three.js to re-run initMaterial()
-    // which re-validates all ~40 uniforms and causes a visible hitch.
     this.gemMesh.rotation.z = this.dna.tilt;
 
     // ── Lights: update colors and speeds in-place ─────────────────────────
@@ -309,10 +314,28 @@ export class LuminaRenderer {
     }
     this.rimLight?.color.setHex(hslToHex((this.dna.hue + 160) % 360, 80, 55));
 
-    // ── Env map: intentionally NOT rebuilt here ───────────────────────────
-    // Rebuilding PMREMGenerator.fromScene() takes ~100 ms and would block
-    // every other render loop. The existing env map stays; the dynamic point
-    // lights handle the per-seed colour variation without any freeze.
+    // ── Geometry: build entirely off the render critical path ─────────────
+    // buildGeometry + applyDistortions are synchronous CPU work (~5 ms).
+    // Running them inside a rAF callback stacks on top of renderer.render()
+    // (which is already 10-20 ms for a transmission material), blowing the
+    // 16 ms frame budget and freezing CSS animations.
+    //
+    // requestIdleCallback fires in the gap between frames when the browser
+    // has spare time. The resulting geometry is stored in this.pendingGeo and
+    // swapped in by _startLoop before the next render — zero impact on any frame.
+    const seq = ++this.updateSeq;
+    const buildGeo = () => {
+      if (this.destroyed || seq !== this.updateSeq) return;
+      const newGeo = buildGeometry(this.dna.cut, this.dna.facets);
+      applyDistortions(newGeo, this.dna);
+      this.pendingGeo?.dispose();   // discard any previously-queued unrendered geo
+      this.pendingGeo = newGeo;
+    };
+    if (typeof requestIdleCallback !== 'undefined') {
+      requestIdleCallback(buildGeo, { timeout: 150 });
+    } else {
+      setTimeout(buildGeo, 0);
+    }
   }
 
   resize(width: number, height: number): void {
@@ -335,6 +358,8 @@ export class LuminaRenderer {
   destroy(): void {
     this.destroyed = true;
     this.pause();
+    this.pendingGeo?.dispose();
+    this.pendingGeo = null;
     this.scene.traverse((obj: THREE.Object3D) => {
       const mesh = obj as THREE.Mesh;
       if (mesh.geometry) mesh.geometry.dispose();

@@ -25,11 +25,9 @@ async function mount(seed: string) {
   }
 
   // Reuse the existing WebGL context — no destroy/recreate, no new context.
-  // Yield one rAF so gallery renders complete their current frame before we
-  // run the synchronous geometry build (which would otherwise block them).
+  // update() is now effectively instant: material/light uniforms are written
+  // synchronously, geometry is built in requestIdleCallback off the render path.
   if (gem) {
-    await new Promise<void>(r => requestAnimationFrame(() => r()))
-    if (id !== mountId) return   // a newer call superseded this one
     gem.update(seed, props.overrides ?? {})
     emit('dna', gem.dna as Record<string, unknown>)
     return
