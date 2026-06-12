@@ -1,46 +1,33 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-// ── Shared gem seed state ─────────────────────────────────────────────────────
-const activeSeed     = useActiveSeed()
+const activeSeed      = useActiveSeed()
 const activeOverrides = ref<Record<string, unknown>>({})
 
-// ── SEO ───────────────────────────────────────────────────────────────────────
 useSeoMeta({
-  title:          'Lumina Gem — Every string is a unique gemstone',
-  description:    'Render a beautiful 3D rotating gemstone from any string. Deterministic, WebGL-powered, Three.js.',
-  ogTitle:        'Lumina Gem',
-  ogDescription:  'Every string is a unique gemstone',
+  title:         'Lumina Gem — Every string is a unique gemstone',
+  description:   'Render a beautiful 3D rotating gemstone from any string. Deterministic, WebGL-powered, Three.js.',
+  ogTitle:       'Lumina Gem',
+  ogDescription: 'Every string is a unique gemstone',
 })
 
-// ── Constants ─────────────────────────────────────────────────────────────────
 const QUICK_PICKS = ['hello world', '0x1a2b3c', 'stardust', 'ultraviolet', 'midnight', 'aurora']
 
-// ── State ─────────────────────────────────────────────────────────────────────
 const inputValue = ref(activeSeed.value)
 const dna        = ref<Record<string, unknown> | null>(null)
 
-// ── Actions ───────────────────────────────────────────────────────────────────
 function renderSeed(s: string, overrides: Record<string, unknown> = {}) {
-  const seed           = s.trim() || 'lumina'
-  activeSeed.value     = seed
+  const seed            = s.trim() || 'lumina'
+  activeSeed.value      = seed
   activeOverrides.value = overrides
-  inputValue.value     = seed
+  inputValue.value      = seed
 }
 
-function onRenderClick()              { renderSeed(inputValue.value) }
-function onKeydown(e: KeyboardEvent)  { if (e.key === 'Enter') renderSeed(inputValue.value) }
+function onRenderClick()             { renderSeed(inputValue.value) }
+function onKeydown(e: KeyboardEvent) { if (e.key === 'Enter') renderSeed(inputValue.value) }
 function onGalleryPick({ seed, overrides }: { seed: string; overrides: Record<string, unknown> }) {
   renderSeed(seed, overrides)
   window.scrollTo({ top: 0, behavior: 'smooth' })
-}
-
-let debounceTimer: ReturnType<typeof setTimeout> | null = null
-function onInput() {
-  if (debounceTimer) clearTimeout(debounceTimer)
-  debounceTimer = setTimeout(() => {
-    if (inputValue.value.trim()) renderSeed(inputValue.value)
-  }, 420)
 }
 </script>
 
@@ -49,78 +36,82 @@ function onInput() {
 
   <div class="page">
 
-    <!-- ── Header ─────────────────────────────────────────────────────────── -->
     <header class="header">
       <h1>✦ Lumina Gem</h1>
       <p>Every string is a unique gemstone</p>
       <span class="badge">WebGL · Three.js · MeshPhysical</span>
     </header>
 
-    <!-- ── Hero (3-column on desktop) ─────────────────────────────────────── -->
-    <div class="hero">
+    <!-- shared-width wrapper: hero + gallery always the same width -->
+    <div class="content">
 
-      <!-- Left: input + quick picks -->
-      <div class="hero-left">
-        <div class="input-card">
-          <label for="gem-input">Your string</label>
-          <div class="input-row">
-            <input
-              id="gem-input"
-              v-model="inputValue"
-              type="text"
-              placeholder="Type anything…"
-              autocomplete="off"
-              spellcheck="false"
-              @keydown="onKeydown"
-              @input="onInput"
-            />
-            <button class="btn" @click="onRenderClick">Render ✦</button>
-          </div>
-          <div class="quick-picks">
-            <button
-              v-for="val in QUICK_PICKS"
-              :key="val"
-              class="chip"
-              @click="renderSeed(val)"
-            >{{ val }}</button>
+      <!-- ── Hero (3-column on desktop) ──────────────────────────────────── -->
+      <div class="hero">
+
+        <!-- Left: input -->
+        <div class="hero-left">
+          <div class="input-card">
+            <div class="card-header">
+              <span class="card-icon">◈</span>
+              <span class="card-title">Seed Crystal</span>
+            </div>
+            <div class="input-row">
+              <input
+                id="gem-input"
+                v-model="inputValue"
+                type="text"
+                placeholder="Type anything…"
+                autocomplete="off"
+                spellcheck="false"
+                @keydown="onKeydown"
+              />
+              <button class="btn" @click="onRenderClick">Render ✦</button>
+            </div>
+            <div class="quick-picks">
+              <button
+                v-for="val in QUICK_PICKS"
+                :key="val"
+                class="chip"
+                @click="renderSeed(val)"
+              >{{ val }}</button>
+            </div>
           </div>
         </div>
+
+        <!-- Centre: gem -->
+        <div class="hero-center">
+          <ClientOnly>
+            <GemViewer :seed="activeSeed" :overrides="activeOverrides" @dna="(d) => dna = d" />
+          </ClientOnly>
+        </div>
+
+        <!-- Right: DNA panel -->
+        <div class="hero-right">
+          <GemDNA :dna="dna" />
+        </div>
+
       </div>
 
-      <!-- Centre: gem viewport -->
-      <div class="hero-center">
-        <ClientOnly>
-          <GemViewer :seed="activeSeed" :overrides="activeOverrides" @dna="(d) => dna = d" />
-        </ClientOnly>
-      </div>
+      <!-- ── Gallery ─────────────────────────────────────────────────────── -->
+      <ClientOnly>
+        <GemGallery @pick="onGalleryPick" />
+      </ClientOnly>
 
-      <!-- Right: DNA panel -->
-      <div class="hero-right">
-        <GemDNA :dna="dna" />
-      </div>
+      <!-- ── Footer ──────────────────────────────────────────────────────── -->
+      <footer class="footer">
+        <p>
+          Built with
+          <a href="https://threejs.org" target="_blank" rel="noopener">Three.js</a>
+          ·
+          <a href="https://github.com/titangmz/lumina-gem" target="_blank" rel="noopener">lumina-gem on GitHub</a>
+        </p>
+      </footer>
 
     </div>
-
-    <!-- ── Gallery ─────────────────────────────────────────────────────────── -->
-    <ClientOnly>
-      <GemGallery @pick="onGalleryPick" />
-    </ClientOnly>
-
-    <!-- ── Footer ─────────────────────────────────────────────────────────── -->
-    <footer class="footer">
-      <p>
-        Built with
-        <a href="https://threejs.org" target="_blank" rel="noopener">Three.js</a>
-        ·
-        <a href="https://github.com/titangmz/lumina-gem" target="_blank" rel="noopener">lumina-gem on GitHub</a>
-      </p>
-    </footer>
-
   </div>
 </template>
 
 <style scoped>
-/* ── Page shell ─────────────────────────────────────────────────────────────── */
 .page {
   position: relative;
   z-index: 1;
@@ -129,7 +120,6 @@ function onInput() {
   flex-direction: column;
   align-items: center;
   padding: 40px 24px 80px;
-  gap: 0;
 }
 
 /* ── Header ─────────────────────────────────────────────────────────────────── */
@@ -148,10 +138,7 @@ function onInput() {
   filter: drop-shadow(0 0 28px rgba(167,139,250,0.5));
   margin-bottom: 8px;
 }
-.header p {
-  color: var(--muted);
-  font-size: 1rem;
-}
+.header p   { color: var(--muted); font-size: 1rem; }
 .badge {
   display: inline-block;
   margin-top: 10px;
@@ -166,20 +153,30 @@ function onInput() {
   color: var(--accent);
 }
 
-/* ── Hero grid ──────────────────────────────────────────────────────────────── */
-.hero {
+/* ── Shared-width content wrapper ───────────────────────────────────────────── */
+.content {
   width: 100%;
   max-width: 1160px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 28px;
+  gap: 0;
 }
 
-@media (min-width: 900px) {
+/* ── Hero grid ──────────────────────────────────────────────────────────────── */
+.hero {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+@media (min-width: 1000px) {
   .hero {
     display: grid;
-    grid-template-columns: 280px minmax(0, 500px) 280px;
+    /* 1fr 500px 1fr always sums to exactly containerWidth → perfect alignment */
+    grid-template-columns: 0.7fr 500px 1.3fr;
     align-items: start;
     gap: 28px;
   }
@@ -190,6 +187,9 @@ function onInput() {
   width: 100%;
   max-width: 560px;
 }
+@media (min-width: 1000px) {
+  .hero-left { max-width: none; }
+}
 
 /* ── Centre column ──────────────────────────────────────────────────────────── */
 .hero-center {
@@ -198,10 +198,19 @@ function onInput() {
   width: 100%;
 }
 
-/* ── Right column: DNA panel ────────────────────────────────────────────────── */
+/* ── Right column: DNA panel stretches to gem height ────────────────────────── */
 .hero-right {
   width: 100%;
   max-width: 560px;
+}
+@media (min-width: 1000px) {
+  .hero-right {
+    max-width: none;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+  }
+  .hero-right > :deep(*) { flex: 1; }
 }
 
 /* ── Input card ─────────────────────────────────────────────────────────────── */
@@ -213,14 +222,23 @@ function onInput() {
   backdrop-filter: blur(12px);
   box-shadow: var(--glow), 0 8px 40px rgba(0,0,0,0.45);
 }
-.input-card label {
-  display: block;
-  font-size: 0.74rem;
-  font-weight: 600;
-  letter-spacing: 0.09em;
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.card-icon {
+  color: var(--accent);
+  font-size: 1rem;
+}
+.card-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--muted);
-  margin-bottom: 10px;
 }
 .input-row {
   display: flex;

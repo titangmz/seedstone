@@ -78,7 +78,6 @@ onBeforeUnmount(() => {
 <style scoped>
 .gallery-section {
   width: 100%;
-  max-width: 900px;
   margin-top: 64px;
 }
 
@@ -94,8 +93,11 @@ onBeforeUnmount(() => {
 
 .gallery-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 18px;
+}
+@media (min-width: 600px) {
+  .gallery-grid { grid-template-columns: repeat(4, 1fr); }
 }
 
 .gallery-item {
@@ -131,7 +133,4 @@ onBeforeUnmount(() => {
   font-family: 'Consolas', 'SF Mono', monospace;
 }
 
-@media (max-width: 480px) {
-  .gallery-grid { grid-template-columns: repeat(2, 1fr); }
-}
 </style>

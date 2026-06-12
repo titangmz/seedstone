@@ -131,6 +131,8 @@ const stats = computed(() => {
   flex-direction: column;
   gap: 16px;
   min-width: 0;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 /* ── Header ─────────────────────────────────────────────────── */
