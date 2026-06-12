@@ -1,50 +1,75 @@
 <script setup lang="ts">
-// @ts-ignore
-import { LuminaRenderer } from 'lumina-gem'
-import { onMounted, onBeforeUnmount, useTemplateRef } from 'vue'
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 
-// ── Props & Emits ─────────────────────────────────────────────────────────────
-const props = defineProps<{ seeds: string[] }>()
-const emit  = defineEmits<{ pick: [seed: string] }>()
+// ── Emits ─────────────────────────────────────────────────────────────────────
+const emit = defineEmits<{
+  pick: [{ seed: string; overrides: Record<string, unknown> }]
+}>()
 
-// ── Per-item gem lifecycle ────────────────────────────────────────────────────
-const SIZE = 180
-const BG   = 0x07080f
-
-interface GemEntry { gem: InstanceType<typeof LuminaRenderer> | null }
-const entries: GemEntry[] = props.seeds.map(() => ({ gem: null }))
-
-function mountGem(el: HTMLDivElement, index: number) {
-  entries[index].gem?.destroy()
-  entries[index].gem = new LuminaRenderer(props.seeds[index], {
-    container:  el,
-    width:      SIZE,
-    height:     SIZE,
-    background: BG,
-  })
+// ── Types ─────────────────────────────────────────────────────────────────────
+interface GalleryItem {
+  seed:      string
+  label:     string
+  overrides: Record<string, unknown>
 }
 
+// ── State ─────────────────────────────────────────────────────────────────────
+const SIZE  = 180
+const BG    = 0x07080f
+const items = ref<GalleryItem[]>([])
+
+// Gems keyed by cut name so we can destroy them on unmount
+const gems = new Map<string, unknown>()
+
+// ── Mount / unmount ───────────────────────────────────────────────────────────
+onMounted(async () => {
+  // Dynamic import keeps lumina-gem (Three.js) out of the SSR bundle entirely
+  const { LuminaRenderer, listCuts } = await import('lumina-gem')
+
+  items.value = (listCuts() as string[]).map((cut) => ({
+    seed:      cut,
+    label:     cut,
+    overrides: { cut },
+  }))
+
+  // Wait for Vue to render the list, then mount each gem
+  await nextTick()
+  document.querySelectorAll<HTMLDivElement>('[data-gem-cut]').forEach((el) => {
+    const cut  = el.dataset.gemCut!
+    const item = items.value.find((i) => i.label === cut)
+    if (!item) return
+    gems.get(cut)?.destroy()
+    gems.set(cut, new LuminaRenderer(item.seed, item.overrides, {
+      container:  el,
+      width:      SIZE,
+      height:     SIZE,
+      background: BG,
+    }))
+  })
+})
+
 onBeforeUnmount(() => {
-  entries.forEach(e => e.gem?.destroy())
+  gems.forEach((g: any) => g?.destroy())
+  gems.clear()
 })
 </script>
 
 <template>
   <section class="gallery-section">
-    <div class="section-title">Gallery — click to render</div>
+    <div class="section-title">Cut showcase</div>
     <div class="gallery-grid">
       <div
-        v-for="(seed, i) in seeds"
-        :key="seed"
+        v-for="item in items"
+        :key="item.label"
         class="gallery-item"
-        :title="`Render &quot;${seed}&quot;`"
-        @click="emit('pick', seed)"
+        :title="`View ${item.label}`"
+        @click="emit('pick', { seed: item.seed, overrides: item.overrides })"
       >
         <div
           class="gallery-gem-wrap"
-          :ref="(el) => el && mountGem(el as HTMLDivElement, i)"
+          :data-gem-cut="item.label"
         />
-        <div class="gallery-label">{{ seed }}</div>
+        <div class="gallery-label">{{ item.label }}</div>
       </div>
     </div>
   </section>

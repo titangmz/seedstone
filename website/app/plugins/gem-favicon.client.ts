@@ -45,7 +45,7 @@ export default defineNuxtPlugin(() => {
     gem?.destroy()
     wrapper.innerHTML = ''
 
-    gem = new LuminaRenderer(seed, {
+    gem = new LuminaRenderer(seed, {}, {
       container:  wrapper,
       width:      SIZE,
       height:     SIZE,

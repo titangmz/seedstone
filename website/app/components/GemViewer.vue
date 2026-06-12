@@ -1,13 +1,8 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onBeforeUnmount, useTemplateRef } from 'vue'
 
-// lumina-gem is loaded as a peer — either via npm link during dev or the built
-// dist when deployed.  We import it as an ES module.
-// @ts-ignore — types live in the library root dist/
-import { LuminaRenderer } from 'lumina-gem'
-
 // ── Props ─────────────────────────────────────────────────────────────────────
-const props = defineProps<{ seed: string }>()
+const props = defineProps<{ seed: string; overrides?: Record<string, unknown> }>()
 
 // ── Emits ─────────────────────────────────────────────────────────────────────
 const emit = defineEmits<{ dna: [dna: Record<string, unknown>] }>()
@@ -16,18 +11,25 @@ const emit = defineEmits<{ dna: [dna: Record<string, unknown>] }>()
 const containerRef = useTemplateRef<HTMLDivElement>('container')
 const loading      = ref(true)
 
-let gem: InstanceType<typeof LuminaRenderer> | null = null
+let gem: any    = null
+let Renderer: any = null
 let ro: ResizeObserver | null = null
 
-function mount(seed: string) {
+async function mount(seed: string) {
   if (!containerRef.value) return
   gem?.destroy()
   gem = null
   loading.value = true
 
+  if (!Renderer) {
+    // Dynamic import keeps lumina-gem (Three.js) out of the SSR bundle
+    const mod = await import('lumina-gem')
+    Renderer = mod.LuminaRenderer
+  }
+
   const size = containerRef.value.clientWidth || 500
   requestAnimationFrame(() => {
-    gem = new LuminaRenderer(seed, {
+    gem = new Renderer(seed, props.overrides ?? {}, {
       container:  containerRef.value!,
       width:      size,
       height:     size,
@@ -50,7 +52,8 @@ onMounted(() => {
   ro.observe(containerRef.value!)
 })
 
-watch(() => props.seed, (s) => mount(s))
+watch(() => props.seed,     (s) => mount(s))
+watch(() => props.overrides, () => mount(props.seed))
 
 onBeforeUnmount(() => {
   gem?.destroy()

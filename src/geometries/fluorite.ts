@@ -1,7 +1,7 @@
 import { buildBipyramid } from './lib/bipyramid';
 import type { GemCutModule } from './index';
 
-// Fluorite cleaves along octahedral planes — d8.
+// Fluorite cleaves along octahedral planes
 const mod: GemCutModule = {
   name: 'fluorite',
   build: () => buildBipyramid(8),

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { buildGeometry, GemCut, listCuts } from './geometries/index';
+import { buildGeometry, listCuts } from './geometries/index';
 import { applyDistortions } from './geometries/lib/distort';
 import { stringToDNA, GemDNA } from './hash';
 
@@ -55,8 +55,6 @@ export interface LuminaOptions {
   height?: number;
   /** Background colour (CSS string, hex number, or null for transparent). Default: null */
   background?: string | number | null;
-  /** Optional cut override. Defaults to the deterministic DNA-selected cut. */
-  cut?: GemCut;
   /** Auto-start rotation on construction. Default: true */
   autoRotate?: boolean;
   /** Device pixel ratio. Default: min(window.devicePixelRatio, 2) */
@@ -96,12 +94,13 @@ export class LuminaRenderer {
   private animFrameId:   number | null = null;
   private destroyed      = false;
 
-  constructor(input: string, options: LuminaOptions) {
+  constructor(input: string, overrides: Partial<GemDNA>, options: LuminaOptions) {
     const cuts = listCuts();
-    const dna = stringToDNA(input, cuts);
+    const base = stringToDNA(input, cuts);
+    const merged = { ...base, ...overrides };
     this.dna = {
-      ...dna,
-      cut: options.cut && cuts.includes(options.cut) ? options.cut : dna.cut,
+      ...merged,
+      cut: cuts.includes(merged.cut) ? merged.cut : base.cut,
     };
 
     const container = options.container;
@@ -377,7 +376,7 @@ export class LuminaRenderer {
 
 // ── Convenience factory ───────────────────────────────────────────────────────
 
-/** Shorthand for `new LuminaRenderer(input, options)`. */
-export function createGem(input: string, options: LuminaOptions): LuminaRenderer {
-  return new LuminaRenderer(input, options);
+/** Shorthand for `new LuminaRenderer(input, overrides, options)`. */
+export function createGem(input: string, overrides: Partial<GemDNA>, options: LuminaOptions): LuminaRenderer {
+  return new LuminaRenderer(input, overrides, options);
 }

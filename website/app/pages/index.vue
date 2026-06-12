@@ -13,13 +13,13 @@ useSeoMeta({
 })
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-const GALLERY_SEEDS = ['cosmos', 'prism', 'fracture', 'obsidian', 'solstice', 'nebula', 'quartz', 'entropy']
 const QUICK_PICKS   = ['hello world', '0x1a2b3c', 'stardust', 'ultraviolet', 'midnight', 'aurora']
 const FACET_LABELS: Record<number, string> = { 6: 'Hexagonal', 7: 'Heptagonal', 8: 'Octagonal' }
 
 // ── State ─────────────────────────────────────────────────────────────────────
-const inputValue = ref(activeSeed.value)
-const dna        = ref<Record<string, unknown> | null>(null)
+const inputValue    = ref(activeSeed.value)
+const activeOverrides = ref<Record<string, unknown>>({})
+const dna           = ref<Record<string, unknown> | null>(null)
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function hueToCSS(hue: number, alpha = 0.18) {
@@ -41,16 +41,17 @@ const dnaPills = computed(() => {
 })
 
 // ── Actions ───────────────────────────────────────────────────────────────────
-function renderSeed(s: string) {
+function renderSeed(s: string, overrides: Record<string, unknown> = {}) {
   const seed = s.trim() || 'lumina'
-  activeSeed.value = seed
-  inputValue.value  = seed
+  activeSeed.value    = seed
+  activeOverrides.value = overrides
+  inputValue.value    = seed
 }
 
-function onRenderClick()           { renderSeed(inputValue.value) }
+function onRenderClick()             { renderSeed(inputValue.value) }
 function onKeydown(e: KeyboardEvent) { if (e.key === 'Enter') renderSeed(inputValue.value) }
-function onGalleryPick(seed: string) {
-  renderSeed(seed)
+function onGalleryPick({ seed, overrides }: { seed: string; overrides: Record<string, unknown> }) {
+  renderSeed(seed, overrides)
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
@@ -105,7 +106,7 @@ function onInput() {
 
     <!-- ── Gem viewport (client-only — WebGL) ─────────────────────────────── -->
     <ClientOnly>
-      <GemViewer :seed="activeSeed" @dna="(d) => dna = d" />
+      <GemViewer :seed="activeSeed" :overrides="activeOverrides" @dna="(d) => dna = d" />
     </ClientOnly>
 
     <!-- ── DNA pills ──────────────────────────────────────────────────────── -->
@@ -123,7 +124,7 @@ function onInput() {
 
     <!-- ── Gallery (client-only — WebGL) ──────────────────────────────────── -->
     <ClientOnly>
-      <GemGallery :seeds="GALLERY_SEEDS" @pick="onGalleryPick" />
+      <GemGallery @pick="onGalleryPick" />
     </ClientOnly>
 
     <!-- ── Footer ─────────────────────────────────────────────────────────── -->
