@@ -1,61 +1,40 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 
 // ── Shared gem seed state ─────────────────────────────────────────────────────
-const activeSeed = useActiveSeed()
+const activeSeed     = useActiveSeed()
+const activeOverrides = ref<Record<string, unknown>>({})
 
 // ── SEO ───────────────────────────────────────────────────────────────────────
 useSeoMeta({
-  title:       'Lumina Gem — Every string is a unique gemstone',
-  description: 'Render a beautiful 3D rotating gemstone from any string. Deterministic, WebGL-powered, Three.js.',
-  ogTitle:     'Lumina Gem',
-  ogDescription: 'Every string is a unique gemstone',
+  title:          'Lumina Gem — Every string is a unique gemstone',
+  description:    'Render a beautiful 3D rotating gemstone from any string. Deterministic, WebGL-powered, Three.js.',
+  ogTitle:        'Lumina Gem',
+  ogDescription:  'Every string is a unique gemstone',
 })
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-const QUICK_PICKS   = ['hello world', '0x1a2b3c', 'stardust', 'ultraviolet', 'midnight', 'aurora']
-const FACET_LABELS: Record<number, string> = { 6: 'Hexagonal', 7: 'Heptagonal', 8: 'Octagonal' }
+const QUICK_PICKS = ['hello world', '0x1a2b3c', 'stardust', 'ultraviolet', 'midnight', 'aurora']
 
 // ── State ─────────────────────────────────────────────────────────────────────
-const inputValue    = ref(activeSeed.value)
-const activeOverrides = ref<Record<string, unknown>>({})
-const dna           = ref<Record<string, unknown> | null>(null)
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-function hueToCSS(hue: number, alpha = 0.18) {
-  return `hsla(${Math.round(hue)},70%,60%,${alpha})`
-}
-
-const dnaPills = computed(() => {
-  if (!dna.value) return []
-  const d = dna.value as any
-  return [
-    { label: `Cut ${String(d.cut ?? 'brilliant')}`,                    color: 'rgba(255,255,255,0.08)' },
-    { label: `Hue ${Math.round(d.hue)}°`,                             color: hueToCSS(d.hue) },
-    { label: `Sat ${Math.round(d.saturation * 100)}%`,                color: 'rgba(255,255,255,0.06)' },
-    { label: FACET_LABELS[d.facets] ?? `${d.facets} facets`,          color: 'rgba(255,255,255,0.06)' },
-    { label: `IOR ${d.ior.toFixed(2)}`,                               color: 'rgba(255,255,255,0.06)' },
-    { label: `Speed ×${d.speed.toFixed(2)}`,                          color: 'rgba(255,255,255,0.06)' },
-    { label: `Fire ${Math.round((d.brilliance ?? 0.5) * 100)}%`,      color: hueToCSS(d.light1Hue, 0.18) },
-  ]
-})
+const inputValue = ref(activeSeed.value)
+const dna        = ref<Record<string, unknown> | null>(null)
 
 // ── Actions ───────────────────────────────────────────────────────────────────
 function renderSeed(s: string, overrides: Record<string, unknown> = {}) {
-  const seed = s.trim() || 'lumina'
-  activeSeed.value    = seed
+  const seed           = s.trim() || 'lumina'
+  activeSeed.value     = seed
   activeOverrides.value = overrides
-  inputValue.value    = seed
+  inputValue.value     = seed
 }
 
-function onRenderClick()             { renderSeed(inputValue.value) }
-function onKeydown(e: KeyboardEvent) { if (e.key === 'Enter') renderSeed(inputValue.value) }
+function onRenderClick()              { renderSeed(inputValue.value) }
+function onKeydown(e: KeyboardEvent)  { if (e.key === 'Enter') renderSeed(inputValue.value) }
 function onGalleryPick({ seed, overrides }: { seed: string; overrides: Record<string, unknown> }) {
   renderSeed(seed, overrides)
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-// Debounced live preview
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
 function onInput() {
   if (debounceTimer) clearTimeout(debounceTimer)
@@ -66,7 +45,6 @@ function onInput() {
 </script>
 
 <template>
-  <!-- Starfield (client-only — needs canvas + RAF) -->
   <ClientOnly><StarfieldCanvas /></ClientOnly>
 
   <div class="page">
@@ -78,51 +56,52 @@ function onInput() {
       <span class="badge">WebGL · Three.js · MeshPhysical</span>
     </header>
 
-    <!-- ── Input card ─────────────────────────────────────────────────────── -->
-    <div class="input-card">
-      <label for="gem-input">Your string</label>
-      <div class="input-row">
-        <input
-          id="gem-input"
-          v-model="inputValue"
-          type="text"
-          placeholder="Type anything…"
-          autocomplete="off"
-          spellcheck="false"
-          @keydown="onKeydown"
-          @input="onInput"
-        />
-        <button class="btn" @click="onRenderClick">Render ✦</button>
+    <!-- ── Hero (3-column on desktop) ─────────────────────────────────────── -->
+    <div class="hero">
+
+      <!-- Left: input + quick picks -->
+      <div class="hero-left">
+        <div class="input-card">
+          <label for="gem-input">Your string</label>
+          <div class="input-row">
+            <input
+              id="gem-input"
+              v-model="inputValue"
+              type="text"
+              placeholder="Type anything…"
+              autocomplete="off"
+              spellcheck="false"
+              @keydown="onKeydown"
+              @input="onInput"
+            />
+            <button class="btn" @click="onRenderClick">Render ✦</button>
+          </div>
+          <div class="quick-picks">
+            <button
+              v-for="val in QUICK_PICKS"
+              :key="val"
+              class="chip"
+              @click="renderSeed(val)"
+            >{{ val }}</button>
+          </div>
+        </div>
       </div>
-      <div class="quick-picks">
-        <button
-          v-for="val in QUICK_PICKS"
-          :key="val"
-          class="chip"
-          @click="renderSeed(val)"
-        >{{ val }}</button>
+
+      <!-- Centre: gem viewport -->
+      <div class="hero-center">
+        <ClientOnly>
+          <GemViewer :seed="activeSeed" :overrides="activeOverrides" @dna="(d) => dna = d" />
+        </ClientOnly>
       </div>
+
+      <!-- Right: DNA panel -->
+      <div class="hero-right">
+        <GemDNA :dna="dna" />
+      </div>
+
     </div>
 
-    <!-- ── Gem viewport (client-only — WebGL) ─────────────────────────────── -->
-    <ClientOnly>
-      <GemViewer :seed="activeSeed" :overrides="activeOverrides" @dna="(d) => dna = d" />
-    </ClientOnly>
-
-    <!-- ── DNA pills ──────────────────────────────────────────────────────── -->
-    <div class="gem-info">
-      <div class="dna-label">Gem DNA</div>
-      <div class="dna-pills">
-        <span
-          v-for="pill in dnaPills"
-          :key="pill.label"
-          class="dna-pill"
-          :style="{ background: pill.color }"
-        >{{ pill.label }}</span>
-      </div>
-    </div>
-
-    <!-- ── Gallery (client-only — WebGL) ──────────────────────────────────── -->
+    <!-- ── Gallery ─────────────────────────────────────────────────────────── -->
     <ClientOnly>
       <GemGallery @pick="onGalleryPick" />
     </ClientOnly>
@@ -141,7 +120,7 @@ function onInput() {
 </template>
 
 <style scoped>
-/* ── Layout ─────────────────────────────────────────────────────────────────── */
+/* ── Page shell ─────────────────────────────────────────────────────────────── */
 .page {
   position: relative;
   z-index: 1;
@@ -149,17 +128,17 @@ function onInput() {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 48px 24px 80px;
+  padding: 40px 24px 80px;
+  gap: 0;
 }
 
 /* ── Header ─────────────────────────────────────────────────────────────────── */
 .header {
   text-align: center;
-  margin-bottom: 44px;
+  margin-bottom: 36px;
 }
-
 .header h1 {
-  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  font-size: clamp(2rem, 4vw, 3rem);
   font-weight: 700;
   letter-spacing: -0.02em;
   background: linear-gradient(135deg, #e0c3fc 0%, #a78bfa 40%, #60a5fa 80%, #c084fc 100%);
@@ -167,85 +146,116 @@ function onInput() {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   filter: drop-shadow(0 0 28px rgba(167,139,250,0.5));
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
-
 .header p {
   color: var(--muted);
-  font-size: 1.05rem;
-  letter-spacing: 0.01em;
+  font-size: 1rem;
 }
-
 .badge {
   display: inline-block;
-  margin-top: 12px;
+  margin-top: 10px;
   padding: 3px 12px;
   border-radius: 100px;
   background: rgba(167,139,250,0.12);
   border: 1px solid rgba(167,139,250,0.3);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--accent);
 }
 
-/* ── Input card ─────────────────────────────────────────────────────────────── */
-.input-card {
+/* ── Hero grid ──────────────────────────────────────────────────────────────── */
+.hero {
+  width: 100%;
+  max-width: 1160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
+
+@media (min-width: 900px) {
+  .hero {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 500px) 280px;
+    align-items: start;
+    gap: 28px;
+  }
+}
+
+/* ── Left column ────────────────────────────────────────────────────────────── */
+.hero-left {
   width: 100%;
   max-width: 560px;
+}
+
+/* ── Centre column ──────────────────────────────────────────────────────────── */
+.hero-center {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+/* ── Right column: DNA panel ────────────────────────────────────────────────── */
+.hero-right {
+  width: 100%;
+  max-width: 560px;
+}
+
+/* ── Input card ─────────────────────────────────────────────────────────────── */
+.input-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 28px 28px 24px;
-  margin-bottom: 40px;
+  padding: 24px 24px 20px;
   backdrop-filter: blur(12px);
   box-shadow: var(--glow), 0 8px 40px rgba(0,0,0,0.45);
 }
-
 .input-card label {
   display: block;
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
   color: var(--muted);
   margin-bottom: 10px;
 }
-
 .input-row {
   display: flex;
   gap: 10px;
 }
-
 .input-row input {
   flex: 1;
-  padding: 12px 16px;
+  padding: 11px 15px;
   border-radius: 10px;
   border: 1px solid var(--border);
   background: rgba(255,255,255,0.06);
   color: var(--text);
-  font-size: 1rem;
+  font-size: 0.95rem;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
+  min-width: 0;
 }
 .input-row input:focus {
   border-color: rgba(167,139,250,0.6);
   box-shadow: 0 0 0 3px rgba(167,139,250,0.15);
 }
-.input-row input::placeholder { color: rgba(255,255,255,0.25); }
+.input-row input::placeholder { color: rgba(255,255,255,0.22); }
 
 .btn {
-  padding: 12px 22px;
+  padding: 11px 20px;
   border-radius: 10px;
   border: none;
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
   background: linear-gradient(135deg, #a78bfa, #60a5fa);
   color: #fff;
   transition: opacity 0.2s, transform 0.15s;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 .btn:hover  { opacity: 0.88; transform: translateY(-1px); }
 .btn:active { transform: translateY(0); }
@@ -253,17 +263,16 @@ function onInput() {
 .quick-picks {
   display: flex;
   flex-wrap: wrap;
-  gap: 7px;
-  margin-top: 14px;
+  gap: 6px;
+  margin-top: 12px;
 }
-
 .chip {
-  padding: 5px 13px;
+  padding: 4px 12px;
   border-radius: 100px;
   border: 1px solid var(--border);
   background: transparent;
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   cursor: pointer;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
@@ -271,38 +280,6 @@ function onInput() {
   background: rgba(167,139,250,0.14);
   color: var(--accent);
   border-color: rgba(167,139,250,0.35);
-}
-
-/* ── DNA pills ──────────────────────────────────────────────────────────────── */
-.gem-info {
-  margin-top: 24px;
-  text-align: center;
-  min-height: 56px;
-}
-
-.dna-label {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--muted);
-  margin-bottom: 6px;
-}
-
-.dna-pills {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 6px;
-}
-
-.dna-pill {
-  padding: 3px 10px;
-  border-radius: 100px;
-  font-size: 0.73rem;
-  font-weight: 600;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.04);
-  color: #c5cae9;
 }
 
 /* ── Footer ─────────────────────────────────────────────────────────────────── */
@@ -314,9 +291,4 @@ function onInput() {
 }
 .footer a { color: var(--muted); text-decoration: none; }
 .footer a:hover { color: var(--accent); }
-
-/* ── Responsive ─────────────────────────────────────────────────────────────── */
-@media (max-width: 480px) {
-  .input-row { flex-direction: column; }
-}
 </style>
