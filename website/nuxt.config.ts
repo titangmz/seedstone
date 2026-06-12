@@ -3,6 +3,8 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
 
+  modules: ['@vercel/speed-insights/nuxt'],
+
   css: ['~/assets/css/main.css'],
 
   // Static site generation — all Three.js content is <ClientOnly> so there
