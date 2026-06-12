@@ -42,31 +42,31 @@ function onGalleryPick({ seed, overrides }: { seed: string; overrides: Record<st
       <span class="badge">WebGL · Three.js · MeshPhysical</span>
     </header>
 
-    <!-- shared-width wrapper: hero + gallery always the same width -->
     <div class="content">
 
-      <!-- ── Hero (3-column on desktop) ──────────────────────────────────── -->
+      <!-- ── Hero ───────────────────────────────────────────────────────────── -->
       <div class="hero">
 
-        <!-- Left: input -->
+        <!-- Left: seed input -->
         <div class="hero-left">
           <div class="input-card">
             <div class="card-header">
               <span class="card-icon">◈</span>
               <span class="card-title">Seed Crystal</span>
             </div>
-            <div class="input-row">
-              <input
-                id="gem-input"
-                v-model="inputValue"
-                type="text"
-                placeholder="Type anything…"
-                autocomplete="off"
-                spellcheck="false"
-                @keydown="onKeydown"
-              />
-              <button class="btn" @click="onRenderClick">Render ✦</button>
-            </div>
+            <p class="card-tagline">Type any string to forge a unique crystalline gem, deterministically generated from your input.</p>
+            <input
+              id="gem-input"
+              v-model="inputValue"
+              type="text"
+              class="seed-input"
+              placeholder="Type anything…"
+              autocomplete="off"
+              spellcheck="false"
+              @keydown="onKeydown"
+            />
+            <button class="btn" @click="onRenderClick">Render ✦</button>
+            <div class="picks-divider"><span>try these</span></div>
             <div class="quick-picks">
               <button
                 v-for="val in QUICK_PICKS"
@@ -83,9 +83,10 @@ function onGalleryPick({ seed, overrides }: { seed: string; overrides: Record<st
           <ClientOnly>
             <GemViewer :seed="activeSeed" :overrides="activeOverrides" @dna="(d) => dna = d" />
           </ClientOnly>
+          <div class="gem-caption">{{ activeSeed }}</div>
         </div>
 
-        <!-- Right: DNA panel -->
+        <!-- Right: genome panel -->
         <div class="hero-right">
           <GemDNA :dna="dna" />
         </div>
@@ -138,7 +139,7 @@ function onGalleryPick({ seed, overrides }: { seed: string; overrides: Record<st
   filter: drop-shadow(0 0 28px rgba(167,139,250,0.5));
   margin-bottom: 8px;
 }
-.header p   { color: var(--muted); font-size: 1rem; }
+.header p { color: var(--muted); font-size: 1rem; }
 .badge {
   display: inline-block;
   margin-top: 10px;
@@ -153,17 +154,16 @@ function onGalleryPick({ seed, overrides }: { seed: string; overrides: Record<st
   color: var(--accent);
 }
 
-/* ── Shared-width content wrapper ───────────────────────────────────────────── */
+/* ── Shared-width wrapper ────────────────────────────────────────────────────── */
 .content {
   width: 100%;
   max-width: 1300px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0;
 }
 
-/* ── Hero grid ──────────────────────────────────────────────────────────────── */
+/* ── Hero grid ───────────────────────────────────────────────────────────────── */
 .hero {
   width: 100%;
   display: flex;
@@ -175,50 +175,33 @@ function onGalleryPick({ seed, overrides }: { seed: string; overrides: Record<st
 @media (min-width: 960px) {
   .hero {
     display: grid;
-    /* input fixed-narrow · gem · genome takes all remaining space */
     grid-template-columns: 1fr 420px 1fr;
-    align-items: start;
+    align-items: stretch;
     gap: 24px;
   }
 }
 
-/* ── Left column ────────────────────────────────────────────────────────────── */
+/* ── Left column ─────────────────────────────────────────────────────────────── */
 .hero-left {
   width: 100%;
   max-width: 560px;
+  display: flex;
+  flex-direction: column;
 }
 @media (min-width: 960px) {
   .hero-left { max-width: none; }
 }
 
-/* ── Centre column ──────────────────────────────────────────────────────────── */
-.hero-center {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-}
-
-/* ── Right column: DNA panel stretches to gem height ────────────────────────── */
-.hero-right {
-  width: 100%;
-  max-width: 560px;
-}
-@media (min-width: 960px) {
-  .hero-right {
-    max-width: none;
-    align-self: stretch;
-    display: flex;
-    flex-direction: column;
-  }
-  .hero-right > :deep(*) { flex: 1; }
-}
-
-/* ── Input card ─────────────────────────────────────────────────────────────── */
+/* ── Input card ──────────────────────────────────────────────────────────────── */
 .input-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 24px 24px 20px;
+  padding: 24px;
   backdrop-filter: blur(12px);
   box-shadow: var(--glow), 0 8px 40px rgba(0,0,0,0.45);
 }
@@ -227,12 +210,8 @@ function onGalleryPick({ seed, overrides }: { seed: string; overrides: Record<st
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 10px;
 }
-.card-icon {
-  color: var(--accent);
-  font-size: 1rem;
-}
+.card-icon  { color: var(--accent); font-size: 1rem; }
 .card-title {
   font-size: 0.7rem;
   font-weight: 700;
@@ -240,12 +219,17 @@ function onGalleryPick({ seed, overrides }: { seed: string; overrides: Record<st
   text-transform: uppercase;
   color: var(--muted);
 }
-.input-row {
-  display: flex;
-  gap: 10px;
+
+.card-tagline {
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.32);
+  margin: 0;
 }
-.input-row input {
-  flex: 1;
+
+.seed-input {
+  width: 100%;
+  box-sizing: border-box;
   padding: 11px 15px;
   border-radius: 10px;
   border: 1px solid var(--border);
@@ -254,16 +238,16 @@ function onGalleryPick({ seed, overrides }: { seed: string; overrides: Record<st
   font-size: 0.95rem;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
-  min-width: 0;
 }
-.input-row input:focus {
+.seed-input:focus {
   border-color: rgba(167,139,250,0.6);
   box-shadow: 0 0 0 3px rgba(167,139,250,0.15);
 }
-.input-row input::placeholder { color: rgba(255,255,255,0.22); }
+.seed-input::placeholder { color: rgba(255,255,255,0.22); }
 
 .btn {
-  padding: 11px 20px;
+  width: 100%;
+  padding: 12px 20px;
   border-radius: 10px;
   border: none;
   cursor: pointer;
@@ -272,17 +256,36 @@ function onGalleryPick({ seed, overrides }: { seed: string; overrides: Record<st
   background: linear-gradient(135deg, #a78bfa, #60a5fa);
   color: #fff;
   transition: opacity 0.2s, transform 0.15s;
-  white-space: nowrap;
-  flex-shrink: 0;
+  letter-spacing: 0.02em;
 }
 .btn:hover  { opacity: 0.88; transform: translateY(-1px); }
 .btn:active { transform: translateY(0); }
+
+.picks-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+}
+.picks-divider span {
+  font-size: 0.67rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.18);
+  white-space: nowrap;
+}
+.picks-divider::before,
+.picks-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,0.07);
+}
 
 .quick-picks {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-top: 12px;
 }
 .chip {
   padding: 4px 12px;
@@ -300,7 +303,41 @@ function onGalleryPick({ seed, overrides }: { seed: string; overrides: Record<st
   border-color: rgba(167,139,250,0.35);
 }
 
-/* ── Footer ─────────────────────────────────────────────────────────────────── */
+/* ── Centre column ───────────────────────────────────────────────────────────── */
+.hero-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+}
+
+.gem-caption {
+  font-size: 0.72rem;
+  font-family: 'Consolas', 'SF Mono', monospace;
+  color: rgba(255,255,255,0.22);
+  letter-spacing: 0.06em;
+  text-align: center;
+  max-width: 420px;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Right column ────────────────────────────────────────────────────────────── */
+.hero-right {
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+}
+@media (min-width: 960px) {
+  .hero-right { max-width: none; }
+  .hero-right > :deep(*) { flex: 1; }
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────────────── */
 .footer {
   margin-top: 72px;
   text-align: center;
