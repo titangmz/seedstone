@@ -90,9 +90,13 @@ export interface DistortDNA {
 export function applyDistortions(geo: THREE.BufferGeometry, dna: DistortDNA): void {
   const p = dna.perfection; // 0 = rough, 1 = perfect
 
+  // Capture original extents before any changes.
+  geo.computeBoundingBox();
+  const origSize = new THREE.Vector3();
+  geo.boundingBox!.getSize(origSize);
+
   // Non-uniform scale: each axis deviates from 1.0 proportionally to (1-perfection).
-  // Dividing by the geometric mean keeps volume constant — uniform scale collapses
-  // to identity so the gem always stays inside the same bounding box.
+  // Dividing by the geometric mean keeps volume constant — uniform scale = identity.
   const sx0 = 1 + (dna.scaleX - 0.5) * 2 * MAX_SCALE_JITTER * (1 - p);
   const sy0 = 1 + (dna.scaleY - 0.5) * 2 * MAX_SCALE_JITTER * (1 - p);
   const sz0 = 1 + (dna.scaleZ - 0.5) * 2 * MAX_SCALE_JITTER * (1 - p);
@@ -102,7 +106,18 @@ export function applyDistortions(geo: THREE.BufferGeometry, dna: DistortDNA): vo
   // Vertex noise: amplitude shrinks to zero as perfection → 1
   applyVertexNoise(geo, MAX_VERTEX_NOISE * (1 - p), Math.floor(dna.noiseSeed * 65536));
 
-  // Recompute flat normals: Three.js computeVertexNormals() assigns the face
-  // normal to all three vertices for unindexed geometry — correct for faceted gems.
+  // Fit back into original bounding box: if any axis grew, uniformly scale down
+  // so the largest overrun sits exactly at the original extent.
+  geo.computeBoundingBox();
+  const newSize = new THREE.Vector3();
+  geo.boundingBox!.getSize(newSize);
+  const fit = Math.min(
+    newSize.x > 0 ? origSize.x / newSize.x : 1,
+    newSize.y > 0 ? origSize.y / newSize.y : 1,
+    newSize.z > 0 ? origSize.z / newSize.z : 1,
+  );
+  if (fit < 1) applyScale(geo, fit, fit, fit);
+
+  // Recompute flat normals after all spatial changes.
   geo.computeVertexNormals();
 }
