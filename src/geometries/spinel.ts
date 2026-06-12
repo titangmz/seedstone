@@ -1,4 +1,4 @@
-import { buildBipyramid } from './lib/dice';
+import { buildBipyramid } from './lib/bipyramid';
 import type { GemCutModule } from './index';
 
 // Spinel crystals grow as tetrahedra — d4.

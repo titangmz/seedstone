@@ -1,9 +1,9 @@
 import { buildBipyramid } from './lib/bipyramid';
 import type { GemCutModule } from './index';
 
-// Fluorite cleaves along octahedral planes — d8.
+// Tourmaline crystals grow as elongated bipyramidal prisms — d20 bipyramid.
 const mod: GemCutModule = {
-  name: 'fluorite',
-  build: () => buildBipyramid(8),
+  name: 'tourmaline',
+  build: () => buildBipyramid(20),
 };
 export default mod;
