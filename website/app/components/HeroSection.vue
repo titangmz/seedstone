@@ -30,7 +30,7 @@ defineExpose({
           <span class="eyebrow">Deterministic visual identity</span>
 
           <h1 class="h1">
-            Give any name<br>
+            Give any string<br>
             its own <em>gemstone</em>.
           </h1>
 
