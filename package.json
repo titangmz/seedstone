@@ -51,6 +51,9 @@
     "url": "https://github.com/titangmz/seedstone/issues"
   },
   "author": "titangmz",
+  "engines": {
+    "node": ">=22"
+  },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^15.0.0",
     "@rollup/plugin-terser": "^1.0.0",
