@@ -9,6 +9,13 @@ const inputValue      = ref(typeof route.query.seed === 'string' ? route.query.s
 const gemConfig       = ref<SeedstoneConfig | null>(null)
 const inputFocused    = ref(false)
 const caseInsensitive = ref(true)
+const copied          = ref(false)
+
+function share() {
+  navigator.clipboard.writeText(window.location.href)
+  copied.value = true
+  setTimeout(() => { copied.value = false }, 2000)
+}
 
 const QUICK_PICKS = ['@satoshi', '0x71C7…976F', 'Orion-7', 'Stripe Inc', 'DOC-99812']
 
@@ -77,6 +84,21 @@ defineExpose({
                 @click="caseInsensitive = !caseInsensitive"
                 @mousedown.prevent
               >Aa</button>
+              <button
+                class="share-btn"
+                :class="{ copied }"
+                title="Copy link to this gem"
+                @click="share"
+                @mousedown.prevent
+              >
+                <svg v-if="!copied" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                </svg>
+                <svg v-else width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </button>
             </div>
 
             <div class="examples">
@@ -220,6 +242,30 @@ defineExpose({
 .case-toggle.active:hover {
   color: oklch(0.82 0.14 290);
   border-color: oklch(0.7 0.15 290 / .65);
+}
+
+.share-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: #67647a;
+  cursor: pointer;
+  transition: color .18s, border-color .18s, background .18s;
+}
+.share-btn:hover {
+  border-color: var(--line-2);
+  color: var(--text-2);
+}
+.share-btn.copied {
+  color: oklch(0.75 0.14 150);
+  border-color: oklch(0.7 0.15 150 / .45);
+  background: oklch(0.7 0.15 150 / .08);
 }
 
 .examples {
