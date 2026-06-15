@@ -1,0 +1,26 @@
+{
+  "name": "seedstone",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:24",
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": {
+      "label": "Nuxt dev server",
+      "onAutoForward": "openPreview"
+    }
+  },
+  "postCreateCommand": "npm install && npm run build && npm install --prefix website",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "Vue.volar",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode"
+      ],
+      "settings": {}
+    }
+  },
+  "remoteUser": "node"
+}
