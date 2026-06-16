@@ -8,12 +8,17 @@ function onScroll() {
 }
 onMounted(() => window.addEventListener("scroll", onScroll, { passive: true }));
 onBeforeUnmount(() => window.removeEventListener("scroll", onScroll));
+
+function scrollTo(id: string, e: MouseEvent) {
+  e.preventDefault();
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+}
 </script>
 
 <template>
   <nav :class="['site-nav', { scrolled }]">
     <div class="nav-in">
-      <a class="brand" href="#hero">
+      <a class="brand" href="#hero" @click="scrollTo('hero', $event)">
         <svg class="brand-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
           <defs>
             <linearGradient id="gm" x1="0" y1="0" x2="1" y2="1">
@@ -43,9 +48,9 @@ onBeforeUnmount(() => window.removeEventListener("scroll", onScroll));
       </a>
 
       <div class="nav-links">
-        <a href="#how">How it works</a>
-        <a href="#usage">Usage</a>
-        <a href="#cases">Use cases</a>
+        <a href="#usage" @click="scrollTo('usage', $event)">Usage</a>
+        <a href="#how" @click="scrollTo('how', $event)">How it works</a>
+        <a href="#cases" @click="scrollTo('cases', $event)">Use cases</a>
       </div>
 
       <div class="nav-cta">
