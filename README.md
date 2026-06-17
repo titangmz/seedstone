@@ -76,12 +76,12 @@ minor release — only depend on them if you pin the version.
 ## Development
 
 ```sh
-# one-time setup
-npm install && npm install --prefix website
+# one-time setup (installs the library and website workspaces)
+pnpm install
 
-npm run dev    # watches the library and serves the website simultaneously
-npm run build  # production bundle into dist/
-npm test       # build + run test suite
+pnpm dev    # watches the library and serves the website simultaneously
+pnpm build  # production bundle into dist/
+pnpm test   # build + run test suite
 ```
 
 ## License

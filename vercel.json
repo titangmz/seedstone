@@ -1,5 +1,5 @@
 {
-  "installCommand": "npm install && npm install --prefix website",
-  "buildCommand": "npm run build && npm run generate --prefix website",
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm build && pnpm --filter seedstone-website generate",
   "outputDirectory": "website/.output/public"
 }

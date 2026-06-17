@@ -42,14 +42,14 @@
   },
   "scripts": {
     "build": "rollup -c",
-    "pretest": "npm run build",
+    "pretest": "pnpm build",
     "test": "vitest run",
-    "prepublishOnly": "npm test",
-    "dev": "concurrently -n lib,web -c magenta,cyan \"rollup -c -w\" \"npm run dev --prefix website\"",
+    "prepublishOnly": "pnpm test",
+    "dev": "concurrently -n lib,web -c magenta,cyan \"rollup -c -w\" \"pnpm --filter seedstone-website dev\"",
     "dev:lib": "rollup -c -w",
-    "website:dev": "npm run dev --prefix website",
-    "website:build": "npm run build --prefix website",
-    "website:preview": "npm run preview --prefix website",
+    "website:dev": "pnpm --filter seedstone-website dev",
+    "website:build": "pnpm --filter seedstone-website build",
+    "website:preview": "pnpm --filter seedstone-website preview",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
     "lint": "oxlint",
@@ -71,5 +71,6 @@
   },
   "engines": {
     "node": ">=22"
-  }
+  },
+  "packageManager": "pnpm@11.7.0"
 }
