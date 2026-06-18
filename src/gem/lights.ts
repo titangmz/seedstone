@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { hslToHex } from "../core/index";
-import type { GemConfig } from "./traits";
+import type { GemConfig } from "./config";
 
 type OrbitConfig = GemConfig["lights"]["orbits"][number];
 

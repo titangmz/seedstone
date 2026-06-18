@@ -1,5 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { renderMeowtar, resolveMeowtar, meowtarTraits } from "../src/meowtar/index";
+import { constant } from "../src/core/index";
+import { renderMeowtar } from "../src/meowtar/index";
+import { resolveMeowtar, meowtarTraits } from "../src/meowtar/config";
 
 describe("meowtar (core-only SVG cat)", () => {
   it("same seed always renders the same cat", () => {
@@ -31,18 +33,22 @@ describe("meowtar (core-only SVG cat)", () => {
 
   it("pins traits via overrides across all seeds", () => {
     for (const seed of ["alice", "bob", "charlie"]) {
-      const c = resolveMeowtar(seed, { coat: { pattern: "striped" }, mood: "smug" });
+      const c = resolveMeowtar(seed, {
+        coat: { pattern: constant("striped") },
+        mood: constant("smug"),
+      });
       expect(c.coat.pattern).toBe("striped");
       expect(c.mood).toBe("smug");
     }
   });
 
   it("every declared pattern and mood renders without throwing", () => {
-    const patterns = ["plain", "striped", "masked", "patched", "speckled", "blaze"];
-    const moods = ["calm", "smug", "wide", "sleepy", "derp"];
+    const patterns = ["plain", "striped", "masked", "patched", "speckled", "blaze"] as const;
+    const moods = ["calm", "smug", "wide", "sleepy", "derp"] as const;
     for (const pattern of patterns)
-      expect(renderMeowtar("x", { coat: { pattern } })).toContain("<svg");
-    for (const mood of moods) expect(renderMeowtar("x", { mood })).toContain("<svg");
+      expect(renderMeowtar("x", { coat: { pattern: constant(pattern) } })).toContain("<svg");
+    for (const mood of moods)
+      expect(renderMeowtar("x", { mood: constant(mood) })).toContain("<svg");
   });
 
   it("exposes the trait declaration for registry/UI use", () => {

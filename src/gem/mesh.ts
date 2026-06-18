@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { buildGeometry } from "./geometries/index";
 import { applyDistortions } from "./geometries/lib/distort";
-import type { GemConfig } from "./traits";
+import type { GemConfig } from "./config";
 
 type GemPart = GemConfig["gem"];
 

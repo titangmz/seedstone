@@ -4,20 +4,21 @@ import { computed, ref, watch } from "vue";
 const copiedInstall = ref(false);
 const copiedUsage = ref(false);
 const usageHtml = ref<string | null>(null);
-const { active } = useActiveUseCase();
+const { active } = useActivePlugin();
 
 const installCmd = "npm install seedstone";
 
 const usageCode = computed(() => {
-  if (active.value.uc.id === "gem")
+  if (active.value.plugin.id === "gem")
     return `import { SeedstoneRenderer } from 'seedstone';
 
 new SeedstoneRenderer('alice', {
   container: document.getElementById('gem'),
 });`;
-  return `import { ${active.value.uc.id === "meowtar" ? "catUseCase" : "useCase"} } from 'seedstone';
+  const name = active.value.plugin.id === "meowtar" ? "catPlugin" : "plugin";
+  return `import { ${name} } from 'seedstone';
 
-${active.value.uc.id === "meowtar" ? "catUseCase" : "useCase"}.mount(
+${name}.mount(
   document.getElementById('avatar'),
   'alice',
 );`;

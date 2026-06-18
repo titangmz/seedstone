@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, onBeforeUnmount } from "vue";
 
-const { active } = useActiveUseCase();
-const activeNoun = computed(() => active.value.noun ?? active.value.uc.name.toLowerCase());
+const { active } = useActivePlugin();
+const activeNoun = computed(() => active.value.noun ?? active.value.plugin.name.toLowerCase());
 
 useHead({
   link: [

@@ -94,24 +94,20 @@ export type Config<T> =
             : T;
 
 /**
- * A deep-partial override tree. At any leaf:
- *   - a plain number/string pins the value (sugar for `constant(...)`),
+ * A deep-partial override tree. At any trait leaf, pass a trait constructor:
+ *   - `constant(v)` pins the value explicitly,
  *   - `seeded(min, max)` makes a scalar seed-driven (even over a constant),
- *   - `pick(options)` re-opens a pinned choice,
- *   - a `constant(...)` trait pins explicitly.
+ *   - `pick(options)` re-opens a pinned choice.
+ * Plain-object branches recurse; arrays and primitive pass-throughs are unchanged.
  */
 export type Override<T> =
-  T extends ConstantTrait<infer V>
-    ? V | Trait
-    : T extends SeededTrait
-      ? number | Trait
-      : T extends PickTrait
-        ? string | Trait
-        : T extends readonly unknown[]
-          ? T
-          : T extends object
-            ? { [K in keyof T]?: Override<T[K]> }
-            : T;
+  T extends Trait
+    ? Trait
+    : T extends readonly unknown[]
+      ? T
+      : T extends object
+        ? { [K in keyof T]?: Override<T[K]> }
+        : T;
 
 // ── Resolution ──────────────────────────────────────────────────────────────
 

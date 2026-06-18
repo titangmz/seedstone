@@ -1,6 +1,6 @@
 import * as THREE from "three";
-import { merge, derive, type Override } from "../core/index";
-import { gemTraits, type GemTraits, type GemConfig } from "./traits";
+import { merge, derive } from "../core/index";
+import { gemTraits, type GemTraits, type GemConfig, type GemOverrides } from "./config";
 import { Environment } from "./environment";
 import { GemMesh } from "./mesh";
 import { Lights } from "./lights";
@@ -8,9 +8,7 @@ import { Sparkles } from "./sparkles";
 
 // ── Public API types ──────────────────────────────────────────────────────────
 
-/** Deep-partial override tree for a gem instance — pin a trait to a value or
- *  flip it with `seeded(min, max)` / `pick(options)`. */
-export type GemOverrides = Override<GemTraits>;
+export type { GemOverrides };
 
 export interface SeedstoneOptions {
   /** Element the canvas is appended to. Required. */

@@ -1,50 +1,11 @@
 /**
  * seedstone — public entry point.
  *
- * The headline API renders a 3D gem from a string (`SeedstoneRenderer`). Under it
- * sits the derivation engine (`constant`/`seeded`/`pick`/`derive`/`merge`) — a
- * zero-dependency, three.js-free core, exported for advanced use and for building
- * other use cases from a seed.
+ * Build any seed-driven visual with `create(plugin, el, seed)`. The gem and
+ * the SVG cat are two bundled plugins; add your own with `definePlugin`.
  */
 
-// ── Gem: render a gem from a string ───────────────────────────────────────────
-
-export { SeedstoneRenderer } from "./gem/renderer";
-export type { SeedstoneOptions } from "./gem/renderer";
-export { gemUseCase } from "./gem/usecase";
-
-// The gem's trait declaration. `configSchema` is the back-compat alias.
-export { gemTraits, gemTraits as configSchema } from "./gem/traits";
-export { controls } from "./gem/controls";
-export { listCuts, buildGeometry } from "./gem/geometries/index";
-
-export type {
-  GemConfig as SeedstoneConfig, // a gem's fully-resolved values (hue, speed, …)
-  GemTraits as SeedstoneSchema, // the raw trait tree (traits still wrapped)
-} from "./gem/traits";
-export type { GemOverrides as SeedstoneConfigOverrides } from "./gem/renderer";
-export type { GemCutModule, GemCut } from "./gem/geometries/index";
-
-// ── Meowtar: render a deterministic SVG cat avatar from a string ─────────────
-
-export { catUseCase, renderMeowtar, resolveMeowtar, meowtarTraits, Meowtar } from "./meowtar/index";
-
-export type {
-  MeowtarTraits,
-  MeowtarValues,
-  MeowtarOverrides,
-  MeowtarConfig,
-  Palette,
-} from "./meowtar/index";
-
-// ── Kit: the uniform use-case contract and helpers ───────────────────────────
-
-export { mountString, defineUseCase } from "./kit/index";
-export type { UseCase, Mounted, MountOptions, ControlBounds } from "./kit/index";
-
-// ── Core: the derivation engine (zero three.js) ───────────────────────────────
-// Import these to declare your own traits and "just get a config" from a seed.
-
+// Core engine
 export {
   constant,
   seeded,
@@ -69,3 +30,29 @@ export type {
   Config,
   Override,
 } from "./core/index";
+
+// Plugin framework
+export { definePlugin, create, buildLabControls } from "./core/index";
+export type {
+  Plugin,
+  View,
+  CreateOptions,
+  LabControl,
+  LabSlider,
+  LabOptions,
+  LabControls,
+} from "./core/index";
+
+// Gem plugin
+export { gemPlugin, buildGeometry, listCuts } from "./gem/index";
+export type { GemConfig, GemTraits, GemOverrides, GemCut, GemCutModule } from "./gem/index";
+
+// Meowtar plugin
+export { catPlugin, renderMeowtar } from "./meowtar/index";
+export type {
+  MeowtarConfig,
+  MeowtarTraits,
+  MeowtarOverrides,
+  MeowtarValues,
+  Palette,
+} from "./meowtar/index";

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { gemTraits, type GemConfig } from "../src/gem/traits";
+import { gemTraits, type GemConfig } from "../src/gem/config";
 import { derive } from "../src/core/index";
 
 // The renderer drives the gem scene from a resolved config, so the gem's traits

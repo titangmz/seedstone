@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
-import { DEFAULT_SAMPLE_SEEDS } from "~/usecases";
+import { DEFAULT_SAMPLE_SEEDS } from "~/plugins";
 
 const route = useRoute();
 const router = useRouter();
-const { active } = useActiveUseCase();
+const { active } = useActivePlugin();
 
 const inputValue = ref(typeof route.query.seed === "string" ? route.query.seed : "");
 const config = ref<unknown>(null);
@@ -21,7 +21,7 @@ function share() {
 }
 
 const noun = computed(
-  () => active.value?.noun ?? active.value?.uc.name.toLowerCase() ?? "identity",
+  () => active.value?.noun ?? active.value?.plugin.name.toLowerCase() ?? "identity",
 );
 const lede = computed(
   () =>
@@ -40,7 +40,7 @@ watch(inputValue, (val) => {
 });
 
 watch(
-  () => active.value?.uc.id,
+  () => active.value?.plugin.id,
   () => {
     config.value = null;
   },
@@ -176,11 +176,11 @@ defineExpose({
         <div class="hero-right">
           <div class="stage">
             <ClientOnly>
-              <UseCaseStage
+              <PluginStage
                 v-if="active"
-                :key="active.uc.id"
+                :key="active.plugin.id"
                 :seed="activeSeed"
-                :use-case="active.uc"
+                :plugin="active.plugin"
                 @config="(c) => (config = c)"
               />
             </ClientOnly>

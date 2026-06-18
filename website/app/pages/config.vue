@@ -30,7 +30,7 @@ interface Section {
 const SEED_DRIVEN = "";
 
 const containerRef = useTemplateRef<HTMLDivElement>("container");
-const { active } = useActiveUseCase();
+const { active } = useActivePlugin();
 const seed = ref("");
 const loaded = ref(false);
 const copied = ref(false);
@@ -254,13 +254,13 @@ function initActiveUseCase(): void {
   mounted?.destroy();
   containerRef.value.innerHTML = "";
   resetLabState();
-  controlsMap = active.value.uc.controls ?? {};
+  controlsMap = active.value.plugin.controls ?? {};
 
   // Walk the trait tree to discover every knob — no manual list. constant() knobs
   // get sliders (bounds from controls); seeded() knobs render as seed-driven with
   // a toggle to pin them; pick() knobs get a select. Add/remove a knob or flip its
   // mode by editing constant()/seeded()/pick() in the active use case's traits.
-  const allKnobs = collectKnobs(active.value.uc.traits);
+  const allKnobs = collectKnobs(active.value.plugin.traits);
 
   const groups = new Map<string, Knob[]>();
   for (const knob of allKnobs) {
@@ -285,7 +285,7 @@ function initActiveUseCase(): void {
   loaded.value = true;
 
   const size = containerRef.value!.clientWidth || 420;
-  mounted = active.value.uc.mount(containerRef.value!, seed.value.trim() || "seedstone", {
+  mounted = active.value.plugin.mount(containerRef.value!, seed.value.trim() || "seedstone", {
     width: size,
     height: size,
     background: null,
@@ -302,7 +302,7 @@ onMounted(() => {
 });
 
 watch(
-  () => active.value.uc.id,
+  () => active.value.plugin.id,
   () => initActiveUseCase(),
 );
 
@@ -320,7 +320,7 @@ onBeforeUnmount(() => {
       <h1>Config lab</h1>
       <p class="sub">
         Tune the active use case live, then copy the <code>config</code> override for
-        <code>{{ active.uc.name }}</code
+        <code>{{ active.plugin.name }}</code
         >.
       </p>
     </header>

@@ -12,7 +12,7 @@
  */
 
 import { mulberry32 } from "../core/index";
-import type { MeowtarValues } from "./traits";
+import type { MeowtarValues } from "./config";
 import type { Palette } from "./palette";
 
 /** A cat ready to draw: resolved traits, palette, name, and a placement seed. */

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { fallbackSummary, type SiteUseCase } from "~/usecases";
+import { fallbackSummary, type SitePlugin } from "~/plugins";
 
 const props = defineProps<{
-  entry: SiteUseCase;
+  entry: SitePlugin;
   config: unknown;
   seed: string;
 }>();
@@ -11,7 +11,7 @@ const props = defineProps<{
 const summary = computed(() =>
   props.entry.summarize
     ? props.entry.summarize(props.config, props.seed)
-    : fallbackSummary(props.config, props.seed, props.entry.uc),
+    : fallbackSummary(props.config, props.seed, props.entry.plugin),
 );
 </script>
 

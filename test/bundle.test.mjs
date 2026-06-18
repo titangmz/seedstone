@@ -1,9 +1,10 @@
 import { describe, it, expect } from "vitest";
 import {
-  configSchema,
+  gemPlugin,
+  constant,
+  seeded,
   derive,
   merge,
-  seeded,
   isSeeded,
   buildGeometry,
   listCuts,
@@ -12,6 +13,8 @@ import {
 // Integration tests against the *built bundle* — they verify that the public
 // exports, the renamed engine API, and the rollup geometry-glob transform all
 // survive the build. Engine internals are unit-tested from source in core.test.ts.
+
+const configSchema = gemPlugin.traits;
 
 const seededLeaves = (node, path = []) => {
   if (isSeeded(node)) return [{ path: path.join("."), min: node.min, max: node.max }];
@@ -42,7 +45,10 @@ describe("public engine", () => {
   });
 
   it("merge pins overrides, and seeded() flips a constant back to seed-driven", () => {
-    const pinned = merge(configSchema, { gem: { hue: 200 }, sparkles: { count: 50 } });
+    const pinned = merge(configSchema, {
+      gem: { hue: constant(200) },
+      sparkles: { count: constant(50) },
+    });
     for (const seed of ["alice", "bob", ""]) {
       const r = derive(pinned, seed);
       expect(r.gem.hue).toBe(200);

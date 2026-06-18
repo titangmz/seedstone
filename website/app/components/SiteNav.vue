@@ -2,7 +2,7 @@
 import { ref, onMounted, onBeforeUnmount } from "vue";
 
 const scrolled = ref(false);
-const { siteUseCases, activeId, setActive } = useActiveUseCase();
+const { sitePlugins, activeId, setActive } = useActivePlugin();
 
 function onScroll() {
   scrolled.value = window.scrollY > 20;
@@ -58,8 +58,8 @@ function scrollTo(id: string, e: MouseEvent) {
         <label class="usecase-picker">
           <span class="sr-only">Use case</span>
           <select :value="activeId" @change="setActive(($event.target as HTMLSelectElement).value)">
-            <option v-for="entry in siteUseCases" :key="entry.uc.id" :value="entry.uc.id">
-              {{ entry.uc.name }}
+            <option v-for="entry in sitePlugins" :key="entry.plugin.id" :value="entry.plugin.id">
+              {{ entry.plugin.name }}
             </option>
           </select>
         </label>

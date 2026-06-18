@@ -1,10 +1,4 @@
-import {
-  catUseCase,
-  gemUseCase,
-  type MeowtarConfig,
-  type SeedstoneConfig,
-  type UseCase,
-} from "seedstone";
+import { catPlugin, gemPlugin, type MeowtarConfig, type SeedstoneConfig, type Plugin } from "seedstone";
 
 export interface SummaryStat {
   label: string;
@@ -19,8 +13,10 @@ export interface Summary {
   stats?: SummaryStat[];
 }
 
-export interface SiteUseCase {
-  uc: UseCase;
+/** A plugin plus the website-only presentation that wraps it. The plugin itself
+ *  (from the package) is purely functional; everything here lives in the site. */
+export interface SitePlugin {
+  plugin: Plugin;
   noun?: string;
   lede?: string;
   sampleSeeds?: string[];
@@ -152,7 +148,9 @@ function catSummary(config: unknown): Summary {
   };
 }
 
-export function fallbackSummary(config: unknown, seed: string, uc: UseCase): Summary {
+/** Generic readout for a plugin without a bespoke `summarize` — walks the
+ *  resolved config and shows the first handful of leaf values. */
+export function fallbackSummary(config: unknown, seed: string, plugin: Plugin): Summary {
   const stats: SummaryStat[] = [];
   const walk = (value: unknown, path: string[] = []) => {
     if (stats.length >= 5) return;
@@ -168,19 +166,19 @@ export function fallbackSummary(config: unknown, seed: string, uc: UseCase): Sum
     }
   };
   walk(config);
-  return { title: uc.name, subtitle: seed, stats };
+  return { title: plugin.name, subtitle: seed, stats };
 }
 
-export const siteUseCases: SiteUseCase[] = [
+export const sitePlugins: SitePlugin[] = [
   {
-    uc: gemUseCase,
+    plugin: gemPlugin,
     noun: "gemstone",
     lede: "Type a username, wallet, company, or AI agent — Seedstone forges a unique 3D gem as its permanent visual identity.",
     sampleSeeds: DEFAULT_SAMPLE_SEEDS,
     summarize: gemSummary,
   },
   {
-    uc: catUseCase,
+    plugin: catPlugin,
     noun: "cat",
     lede: "Type a username, wallet, company, or AI agent — Seedstone draws a deterministic SVG cat as its permanent visual identity.",
     sampleSeeds: ["@satoshi", "Mochi-77", "0x71C7...976F", "Patchwork Labs", "DOC-99812"],

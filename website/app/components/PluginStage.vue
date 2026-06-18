@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from "vue";
-import type { Mounted, UseCase } from "seedstone";
+import type { Mounted, Plugin } from "seedstone";
 
 const props = defineProps<{
   seed: string;
-  useCase: UseCase;
+  plugin: Plugin;
   overrides?: object;
   targetFPS?: number;
 }>();
@@ -38,7 +38,7 @@ function mount(): void {
   destroy();
   loading.value = true;
   const s = size();
-  instance = props.useCase.mount(container, props.seed, {
+  instance = props.plugin.mount(container, props.seed, {
     width: s,
     height: s,
     background: null,
@@ -65,7 +65,7 @@ onMounted(async () => {
 });
 
 watch(
-  () => props.useCase.id,
+  () => props.plugin.id,
   () => mount(),
 );
 

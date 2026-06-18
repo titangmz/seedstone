@@ -6,7 +6,7 @@
  */
 
 import { hslToHex } from "../core/index";
-import type { MeowtarValues } from "./traits";
+import type { MeowtarValues } from "./config";
 
 /** Every fill the drawing needs, as `#rrggbb` strings. */
 export interface Palette {

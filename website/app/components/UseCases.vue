@@ -2,7 +2,7 @@
 import { nextTick, onBeforeUnmount, onMounted, watch } from "vue";
 import type { Mounted } from "seedstone";
 
-const { active } = useActiveUseCase();
+const { active } = useActivePlugin();
 
 const USE_CASES = [
   {
@@ -65,7 +65,7 @@ function setupObserver(): void {
         if (!el.isConnected) return;
         const s = el.clientWidth || 104;
         thumbnails.push(
-          active.value.uc.mount(el, el.dataset.ucSeed!, {
+          active.value.plugin.mount(el, el.dataset.ucSeed!, {
             width: s,
             height: s,
             background: null,
@@ -83,7 +83,7 @@ onMounted(() => {
 });
 
 watch(
-  () => active.value.uc.id,
+  () => active.value.plugin.id,
   async () => {
     await nextTick();
     setupObserver();
