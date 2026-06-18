@@ -1,19 +1,10 @@
 import * as THREE from "three";
-import {
-  mergeSchema,
-  resolveConfig,
-  SeedstoneSchema,
-  SeedstoneConfig,
-  SeedstoneConfigOverrides,
-} from "./config";
-import { Environment } from "./scene/environment";
-import { Gem } from "./scene/gem";
-import { Lights } from "./scene/lights";
-import { Sparkles } from "./scene/sparkles";
+import { merge, derive, type Override, type Traits } from "../core/index";
+import type { SceneFactory, Scene, SceneContext, ViewerConfig } from "./contract";
 
 // ── Public API types ──────────────────────────────────────────────────────────
 
-export interface SeedstoneOptions {
+export interface ViewerOptions {
   /** Element the canvas is appended to. Required. */
   container: HTMLElement;
   /** Canvas size in px. Defaults to the container's client size. */
@@ -27,33 +18,30 @@ export interface SeedstoneOptions {
   pixelRatio?: number;
   /** Cap the render loop frame rate. Useful for gallery thumbnails (e.g. 24). */
   targetFPS?: number;
-  /** Pin any schema knob for this instance, e.g. `{ gem: { cut: 'garnet', hue: 200 } }`. */
-  config?: SeedstoneConfigOverrides;
+  /** Pin or seed any trait for this instance, e.g. `{ gem: { cut: 'garnet', hue: 200 } }`. */
+  config?: Override<Traits>;
   /** Keep the drawing buffer readable for canvas.toDataURL(). Costs performance. Default: false. */
   preserveDrawingBuffer?: boolean;
   /** Called once the shaders are compiled and the first frame is painted —
-   *  useful for hiding a loading state. The gem appears stutter-free. */
+   *  useful for hiding a loading state. The scene appears stutter-free. */
   onReady?: () => void;
 }
 
-// ── Renderer ──────────────────────────────────────────────────────────────────
+// ── Viewer ──────────────────────────────────────────────────────────────────
 
 /**
- * Owns the WebGL context, camera, and render loop, and orchestrates the four
- * scene modules (environment, gem, lights, sparkles). Changing seed or config
- * reconciles the modules in place (off the render path) on the same WebGL
- * context — cheap properties are patched directly and only the geometry build,
- * PMREM env bake, or sparkle scatter whose inputs changed is redone.
+ * The generic 3D toolkit core: owns the WebGL context, camera, and render loop,
+ * and drives a use case's `Scene` (built by its `SceneFactory`). Changing seed
+ * or config reconciles the scene in place (off the render path) on the same
+ * WebGL context. Knows nothing about the gem — the gem is just one `SceneFactory`.
  */
-export class SeedstoneRenderer {
-  private schema: SeedstoneSchema; // knob tree with instance overrides pinned
+export class Viewer<C extends ViewerConfig = ViewerConfig> {
+  private factory: SceneFactory<C>;
+  private traits: Traits; // trait tree with instance overrides applied
   private renderer: THREE.WebGLRenderer;
   private scene: THREE.Scene;
   private camera: THREE.PerspectiveCamera;
-  private environment!: Environment;
-  private gem!: Gem;
-  private lights!: Lights;
-  private sparkles!: Sparkles;
+  private content!: Scene<C>; // the use case's mounted scene
 
   private minFrameMs: number; // minimum ms between renders (FPS cap)
   private onReady?: () => void; // fired after the first stutter-free paint
@@ -66,12 +54,13 @@ export class SeedstoneRenderer {
   /** The seed currently being rendered. Read-only. */
   seed: string;
   /** The resolved per-seed config currently being rendered. Read-only. */
-  config: SeedstoneConfig;
+  config: C;
 
-  constructor(seed: string, options: SeedstoneOptions) {
-    this.schema = mergeSchema(options.config);
+  constructor(seed: string, factory: SceneFactory<C>, options: ViewerOptions) {
+    this.factory = factory;
+    this.traits = merge(factory.traits, options.config);
     this.seed = seed;
-    this.config = resolveConfig(this.schema, seed);
+    this.config = derive(this.traits, seed) as C;
 
     const container = options.container;
     if (!container) throw new Error("[seedstone] options.container is required.");
@@ -112,18 +101,21 @@ export class SeedstoneRenderer {
     );
 
     this._applyRendererConfig();
-    this._buildScene();
+    this.content = factory.createScene(this.config, this._context());
     this._start(options.autoRotate !== false);
+  }
+
+  private _context(): SceneContext {
+    return { scene: this.scene, camera: this.camera, renderer: this.renderer };
   }
 
   /**
    * Pre-compile the scene's shaders off the main thread, then paint the first
-   * frame and start the loop. The gem's transmission/iridescence program is
-   * heavy; compiling it lazily on the first render stalls for a few hundred ms,
-   * so we wait for `compileAsync` (non-blocking where the parallel-compile
-   * extension exists) before showing anything. `.then(start, start)` runs the
-   * start path even if the compile rejects — degrading to a lazy compile rather
-   * than never rendering.
+   * frame and start the loop. A heavy transmission/iridescence program stalls
+   * for a few hundred ms if compiled lazily on the first render, so we wait for
+   * `compileAsync` (non-blocking where the parallel-compile extension exists)
+   * before showing anything. `.then(start, start)` runs the start path even if
+   * the compile rejects — degrading to a lazy compile rather than never rendering.
    */
   private _start(autoRotate: boolean): void {
     const start = () => {
@@ -137,7 +129,7 @@ export class SeedstoneRenderer {
 
   // ── Scene lifecycle ───────────────────────────────────────────────────────
 
-  /** Renderer/camera knobs that apply outside the scene modules. */
+  /** Renderer/camera knobs that apply outside the use case's scene. */
   private _applyRendererConfig(): void {
     const { renderer: rendererCfg, camera: cameraCfg } = this.config;
     this.renderer.toneMappingExposure = rendererCfg.toneMappingExposure;
@@ -150,37 +142,17 @@ export class SeedstoneRenderer {
     this.camera.updateProjectionMatrix();
   }
 
-  private _buildScene(): void {
-    this.environment = new Environment(this.renderer, this.config);
-    this.scene.environment = this.environment.render();
-    this.gem = new Gem(this.scene, this.config);
-    this.lights = new Lights(this.scene, this.config);
-    this.sparkles = new Sparkles(this.scene, this.config);
-  }
-
-  private _disposeScene(): void {
-    this.gem.dispose();
-    this.lights.dispose();
-    this.sparkles.dispose();
-    this.environment.dispose();
-  }
-
   /**
-   * Reconcile the scene modules to the current config, in place on the existing
-   * WebGL context — patching colours/material/lights and rebuilding only the
-   * geometry / PMREM bake / sparkle scatter whose inputs actually changed. Runs
-   * in idle time, off the render path, and coalesces bursts (rapid typing) via
-   * `rebuildSeq` so only the latest config is applied.
+   * Reconcile the scene to the current config, in place on the existing WebGL
+   * context. Runs in idle time, off the render path, and coalesces bursts (rapid
+   * typing) via `rebuildSeq` so only the latest config is applied.
    */
   private _scheduleApply(): void {
     const seq = ++this.rebuildSeq;
     const apply = () => {
       if (this.destroyed || seq !== this.rebuildSeq) return;
       this._applyRendererConfig();
-      this.scene.environment = this.environment.update(this.config);
-      this.gem.update(this.config);
-      this.lights.update(this.config);
-      this.sparkles.update(this.config);
+      this.content.update(this.config);
       if (this.animFrameId === null) this._renderFrame(); // paused → show the result now
     };
     setTimeout(apply, 0);
@@ -190,8 +162,7 @@ export class SeedstoneRenderer {
 
   /** Render one frame at the current animation time. */
   private _renderFrame(): void {
-    this.gem.animate(this.elapsed);
-    this.sparkles.animate(this.elapsed);
+    this.content.animate(this.elapsed);
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -218,25 +189,25 @@ export class SeedstoneRenderer {
   // ── Public methods ────────────────────────────────────────────────────────
 
   /**
-   * Swap to a new seed without touching the WebGL context. `seed` and
-   * `config` update immediately; the scene rebuild runs in idle time and
-   * shows up within a frame or two.
+   * Swap to a new seed without touching the WebGL context. `seed` and `config`
+   * update immediately; the scene rebuild runs in idle time and shows up within
+   * a frame or two.
    */
   update(seed: string): void {
     if (this.destroyed) return;
     this.seed = seed;
-    this.config = resolveConfig(this.schema, seed);
+    this.config = derive(this.traits, seed) as C;
     this._scheduleApply();
   }
 
   /**
-   * Re-apply config overrides on a live instance, replacing any previous
-   * ones. Intended for theming and interactive tuning, not per-frame use.
+   * Re-apply config overrides on a live instance, replacing any previous ones.
+   * Intended for theming and interactive tuning, not per-frame use.
    */
-  setConfig(overrides: SeedstoneConfigOverrides = {}): void {
+  setConfig(overrides: Override<Traits> = {}): void {
     if (this.destroyed) return;
-    this.schema = mergeSchema(overrides);
-    this.config = resolveConfig(this.schema, this.seed);
+    this.traits = merge(this.factory.traits, overrides);
+    this.config = derive(this.traits, this.seed) as C;
     this._scheduleApply();
   }
 
@@ -263,7 +234,7 @@ export class SeedstoneRenderer {
     this.destroyed = true;
     this.pause();
     this.renderer.domElement.remove();
-    this._disposeScene();
+    this.content.dispose();
     this.renderer.dispose();
     // Chrome paints a brief white frame when a WebGL context is force-lost.
     // Defer the loss to the next frame — by then the detached canvas's

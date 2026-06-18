@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { reactive, ref, computed, onMounted, onBeforeUnmount, useTemplateRef } from "vue";
-import type { SeedstoneRenderer, ScalarParam, ChoiceParam } from "seedstone";
+import type {
+  SeedstoneRenderer,
+  ConstantTrait,
+  SeededTrait,
+  PickTrait,
+  ControlBounds,
+} from "seedstone";
 
 useSeoMeta({ title: "Seedstone — Config lab", robots: "noindex" });
 
@@ -44,39 +50,63 @@ let gem: SeedstoneRenderer | null = null;
 let ro: ResizeObserver | null = null;
 let applyTimer: ReturnType<typeof setTimeout> | undefined;
 
-// ── Schema walking ────────────────────────────────────────────────────────────
+// ── Trait walking ─────────────────────────────────────────────────────────────
 
-function isScalarParam(v: unknown): v is ScalarParam {
-  return typeof v === "object" && v !== null && "mode" in v && "min" in v;
+function isSeededTrait(v: unknown): v is SeededTrait {
+  return typeof v === "object" && v !== null && (v as { kind?: unknown }).kind === "seeded";
+}
+function isConstantTrait(v: unknown): v is ConstantTrait {
+  return typeof v === "object" && v !== null && (v as { kind?: unknown }).kind === "constant";
+}
+function isPickTrait(v: unknown): v is PickTrait {
+  return typeof v === "object" && v !== null && (v as { kind?: unknown }).kind === "pick";
 }
 
-function isChoiceParam(v: unknown): v is ChoiceParam {
-  return typeof v === "object" && v !== null && "mode" in v && "options" in v;
-}
+// Slider bounds for `constant` traits — a presentation concern, exported by the
+// gem alongside its traits. Set in onMounted before walking the trait tree.
+let controlsMap: Record<string, ControlBounds> = {};
 
-/** Recursively collect all parameter leaves from the schema. */
+/** Recursively collect all trait leaves from the trait tree.
+ *  seeded → seed-driven number (range from the trait); constant → pinned number
+ *  (slider bounds from `controls`, if any); pick → seed-driven choice. */
 function collectKnobs(obj: unknown, path: string[] = []): Knob[] {
-  if (isScalarParam(obj)) {
+  const dotted = path.join(".");
+  if (isSeededTrait(obj)) {
     return [
       {
         kind: "number",
-        path: path.join("."),
-        mode: obj.mode,
+        path: dotted,
+        mode: "dna",
         min: obj.min,
         max: obj.max,
-        step: obj.step,
+        step: (obj.max - obj.min) / 100,
+        value: (obj.min + obj.max) / 2, // midpoint, as derive() resolves with no seed
+      },
+    ];
+  }
+  if (isConstantTrait(obj)) {
+    if (typeof obj.value !== "number") return []; // string constant (pinned choice) — gem has none
+    const b = controlsMap[dotted];
+    return [
+      {
+        kind: "number",
+        path: dotted,
+        mode: "config",
+        min: b?.min ?? obj.value,
+        max: b?.max ?? obj.value,
+        step: b?.step ?? 0.01,
         value: obj.value,
       },
     ];
   }
-  if (isChoiceParam(obj)) {
+  if (isPickTrait(obj)) {
     return [
       {
         kind: "pick",
-        path: path.join("."),
-        mode: obj.mode,
+        path: dotted,
+        mode: "dna", // picks are seed-driven; pin one by selecting it
         options: obj.options(),
-        value: obj.value ?? SEED_DRIVEN,
+        value: SEED_DRIVEN,
       },
     ];
   }
@@ -124,10 +154,14 @@ function isKnobDirty(knob: Knob): boolean {
 
 // ── Overrides ─────────────────────────────────────────────────────────────────
 
-// SEEDED is the override marker for "make this seed-generated" — what seeded()
-// returns. We carry it as a plain object so it both applies live (mergeSchema
-// understands it) and serializes back to a seeded() call in the copied code.
-const SEEDED = { mode: "dna" } as const;
+// Per-knob seeded ranges, captured while collecting knobs. Flipping a knob to
+// seed-driven emits a `seeded(min, max)` trait as the override — carried as a
+// plain object so it both applies live (merge understands it) and serializes
+// back to a `seeded(min, max)` call in the copied code.
+const ranges: Record<string, { min: number; max: number }> = {};
+function seededMarker(path: string) {
+  return { kind: "seeded", min: ranges[path].min, max: ranges[path].max };
+}
 
 const changed = computed(() => {
   const result: Array<[string, unknown]> = [];
@@ -136,7 +170,7 @@ const changed = computed(() => {
       const cur = modes[path];
       if (cur === "dna") {
         // seed-driven: only an override if it was pinned by default
-        if (cur !== defModes[path]) result.push([path, SEEDED]);
+        if (cur !== defModes[path]) result.push([path, seededMarker(path)]);
       } else {
         // pinned: emit a plain number when the mode flipped or the value changed
         if (cur !== defModes[path] || values[path] !== defaults[path])
@@ -156,14 +190,14 @@ const overrides = computed(() => {
   return result;
 });
 
-/** Pretty-print the overrides tree as a JS literal, rendering the seeded marker
- *  as a `seeded()` call so the copied snippet matches the public API. */
+/** Pretty-print the overrides tree as a JS literal, rendering a seeded marker
+ *  as a `seeded(min, max)` call so the copied snippet matches the public API. */
 function serializeOverrides(obj: Record<string, any>, indent = 2): string {
   const pad = " ".repeat(indent);
   const entries = Object.entries(obj).map(([k, v]) => {
     let val: string;
     if (v && typeof v === "object" && !Array.isArray(v)) {
-      val = v.mode === "dna" ? "seeded()" : serializeOverrides(v, indent + 2);
+      val = v.kind === "seeded" ? `seeded(${v.min}, ${v.max})` : serializeOverrides(v, indent + 2);
     } else {
       val = typeof v === "string" ? `'${v}'` : String(v);
     }
@@ -172,7 +206,7 @@ function serializeOverrides(obj: Record<string, any>, indent = 2): string {
   return `{\n${entries.join(",\n")}\n${" ".repeat(indent - 2)}}`;
 }
 
-const usesSeeded = computed(() => changed.value.some(([, v]) => (v as any)?.mode === "dna"));
+const usesSeeded = computed(() => changed.value.some(([, v]) => (v as any)?.kind === "seeded"));
 
 const overridesCode = computed(() => {
   const body = serializeOverrides(overrides.value);
@@ -206,12 +240,13 @@ function onSeedInput(): void {
 // ── Lifecycle ─────────────────────────────────────────────────────────────────
 
 onMounted(async () => {
-  const { SeedstoneRenderer, configSchema } = await import("seedstone");
+  const { SeedstoneRenderer, configSchema, controls } = await import("seedstone");
+  controlsMap = controls;
 
-  // Walk configSchema to discover every knob — no manual list. c() knobs get
-  // sliders; d() knobs render as seed-driven with a toggle to pin them; pick()
-  // knobs get a select. Add/remove a knob or flip its mode by editing
-  // c()/d()/pick() in src/config.ts.
+  // Walk the trait tree to discover every knob — no manual list. constant() knobs
+  // get sliders (bounds from controls); seeded() knobs render as seed-driven with
+  // a toggle to pin them; pick() knobs get a select. Add/remove a knob or flip its
+  // mode by editing constant()/seeded()/pick() in src/gem/traits.ts.
   const allKnobs = collectKnobs(configSchema);
 
   const groups = new Map<string, Knob[]>();
@@ -223,13 +258,14 @@ onMounted(async () => {
     if (knob.kind === "number") {
       defModes[knob.path] = knob.mode;
       modes[knob.path] = knob.mode;
-      // knob.value is always set: fixed value for c(), midpoint for d()
+      ranges[knob.path] = { min: knob.min, max: knob.max };
+      // knob.value is always set: fixed value for constant(), midpoint for seeded()
       defaults[knob.path] = knob.value;
       values[knob.path] = knob.value;
     } else {
-      // pick knob — seed-driven by default unless the schema pins it
-      defaults[knob.path] = knob.mode === "config" ? knob.value : SEED_DRIVEN;
-      values[knob.path] = knob.mode === "config" ? knob.value : SEED_DRIVEN;
+      // pick knob — seed-driven by default; selecting an option pins it
+      defaults[knob.path] = SEED_DRIVEN;
+      values[knob.path] = SEED_DRIVEN;
     }
   }
   sections.value = [...groups.entries()].map(([title, knobs]) => ({ title, knobs }));

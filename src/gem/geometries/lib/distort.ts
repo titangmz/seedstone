@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { hash2D } from "../../../core/random";
 
 // ── Tuning knobs ──────────────────────────────────────────────────────────────
 // Adjust these to change the range of distortion at perfection = 0.
@@ -8,20 +9,6 @@ export const MAX_SCALE_JITTER = 0.85;
 
 /** Max vertex displacement in model-space units. Gem radius is ~0.65. */
 export const MAX_VERTEX_NOISE = 0.15;
-
-// ── Internal hash ─────────────────────────────────────────────────────────────
-
-function u32(n: number): number {
-  n = n >>> 0;
-  n = Math.imul(((n >>> 16) ^ n) >>> 0, 0x45d9f3b) >>> 0;
-  n = Math.imul(((n >>> 16) ^ n) >>> 0, 0x45d9f3b) >>> 0;
-  return ((n >>> 16) ^ n) >>> 0;
-}
-
-/** Deterministic float in [0, 1) from two integers. */
-function h01(seed: number, i: number): number {
-  return u32((seed * 65537 + i) >>> 0) / 4294967295;
-}
 
 // ── Scale distortion ──────────────────────────────────────────────────────────
 
@@ -51,9 +38,9 @@ function applyVertexNoise(geo: THREE.BufferGeometry, amplitude: number, seed: nu
     const key = `${Math.round(pos.getX(i) * SNAP)},${Math.round(pos.getY(i) * SNAP)},${Math.round(pos.getZ(i) * SNAP)}`;
     if (!groups.has(key)) {
       const gi = groups.size;
-      let dx = h01(seed, gi * 3 + 0) - 0.5;
-      let dy = h01(seed, gi * 3 + 1) - 0.5;
-      let dz = h01(seed, gi * 3 + 2) - 0.5;
+      let dx = hash2D(seed, gi * 3 + 0) - 0.5;
+      let dy = hash2D(seed, gi * 3 + 1) - 0.5;
+      let dz = hash2D(seed, gi * 3 + 2) - 0.5;
       const len = Math.sqrt(dx * dx + dy * dy + dz * dz) || 1;
       groups.set(key, [(dx / len) * amplitude, (dy / len) * amplitude, (dz / len) * amplitude]);
     }

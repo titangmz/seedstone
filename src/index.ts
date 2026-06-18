@@ -1,34 +1,78 @@
 /**
- * seedstone — public entry point
+ * seedstone — public entry point.
+ *
+ * The headline API renders a 3D gem from a string (`SeedstoneRenderer`). Under
+ * it sit three reusable layers, each exported for advanced use and for building
+ * other use cases:
+ *   - the derivation engine (`constant`/`seeded`/`pick`/`derive`/`merge`) — zero three.js
+ *   - the 3D toolkit (`Viewer` + `SceneFactory`)
+ *   - the gem use case (its traits, controls, geometry registry)
  */
 
-// ── Core API ──────────────────────────────────────────────────────────────────
-// Everything you need to render a gem from a string.
+// ── Gem: render a gem from a string ───────────────────────────────────────────
 
-export { SeedstoneRenderer } from "./renderer";
-export { seeded } from "./config";
+export { SeedstoneRenderer } from "./gem/renderer";
+export type { SeedstoneOptions } from "./gem/renderer";
+
+// The gem's trait declaration. `configSchema` is the back-compat alias.
+export { gemTraits, gemTraits as configSchema } from "./gem/traits";
+export { controls } from "./gem/controls";
+export { listCuts, buildGeometry } from "./gem/geometries/index";
 
 export type {
-  SeedstoneConfig, // a gem's fully-resolved values (hue, speed, …)
-  SeedstoneConfigOverrides, // the deep-partial tree you pass to pin/seed values
-} from "./config";
+  GemConfig as SeedstoneConfig, // a gem's fully-resolved values (hue, speed, …)
+  GemTraits as SeedstoneSchema, // the raw trait tree (traits still wrapped)
+} from "./gem/traits";
+export type { GemOverrides as SeedstoneConfigOverrides } from "./gem/renderer";
+export type { ControlBounds } from "./gem/controls";
 
-// ── Advanced: schema introspection ────────────────────────────────────────────
-// Only needed to *inspect* the tuning schema — e.g. to build a config UI that
-// walks every parameter and reads its range. Normal usage never touches these.
+// ── Core: the derivation engine (zero three.js) ───────────────────────────────
+// Import these to declare your own traits and "just get a config" from a seed.
 
 export {
-  config as configSchema,
-  mergeSchema,
-  resolveConfig,
-  isScalarParam,
-  isChoiceParam,
-} from "./config";
-export { listCuts, buildGeometry } from "./geometries/index";
+  constant,
+  seeded,
+  pick,
+  derive,
+  merge,
+  isConstant,
+  isSeeded,
+  isPick,
+  sampleUnit,
+  mulberry32,
+  hash2D,
+  hslToHex,
+} from "./core/index";
 
 export type {
-  ScalarParam, // a numeric parameter: { mode, value, min, max, step }
-  ChoiceParam, // a categorical parameter: { mode, value, options }
-  SeedstoneSchema, // the raw schema tree (params still wrapped)
-  Seeded, // marker returned by seeded()
-} from "./config";
+  Trait,
+  ConstantTrait,
+  SeededTrait,
+  PickTrait,
+  Traits,
+  Config,
+  Override,
+} from "./core/index";
+
+// ── Three: the 3D toolkit ─────────────────────────────────────────────────────
+// The generic Viewer + reusable scene blocks any 3D use case builds on.
+
+export { Viewer, Lights, Environment, Sparkles } from "./three/index";
+export type {
+  ViewerOptions,
+  SceneFactory,
+  Scene,
+  SceneContext,
+  ViewerConfig,
+  LightsConfig,
+  LightsInputs,
+  OrbitConfig,
+  EnvironmentConfig,
+  EnvironmentInputs,
+  SparklesConfig,
+} from "./three/index";
+
+// ── Gem internals (advanced) ──────────────────────────────────────────────────
+
+export { gemSceneFactory } from "./gem/scene";
+export type { GemCutModule, GemCut } from "./gem/geometries/index";

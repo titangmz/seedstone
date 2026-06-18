@@ -1,13 +1,13 @@
 import * as THREE from "three";
-import { buildGeometry } from "../geometries/index";
-import { applyDistortions } from "../geometries/lib/distort";
-import type { SeedstoneConfig } from "../config";
+import { buildGeometry } from "./geometries/index";
+import { applyDistortions } from "./geometries/lib/distort";
+import type { GemConfig } from "./traits";
 
-type GemConfig = SeedstoneConfig["gem"];
+type GemPart = GemConfig["gem"];
 
 /** The geometry is fully determined by the cut plus the distortion seeds — so a
  *  rebuild is only needed when one of those changes (not on a colour/material tweak). */
-function geometrySignature(gem: GemConfig): string {
+function geometrySignature(gem: GemPart): string {
   const d = gem.distortion;
   return [gem.cut, d.perfection, d.scaleX, d.scaleY, d.scaleZ, d.noiseSeed].join(",");
 }
@@ -19,16 +19,15 @@ function geometrySignature(gem: GemConfig): string {
  * Colour and material values are patched in place on update; the geometry is
  * only rebuilt when the cut or distortion changes.
  */
-export class Gem {
-  private cfg: GemConfig;
+export class GemMesh {
+  private cfg: GemPart;
   private mesh: THREE.Mesh;
   private wireframe: THREE.Mesh; // child of mesh, shares its geometry
   private material: THREE.MeshPhysicalMaterial;
   private geometrySig: string;
 
-  constructor(scene: THREE.Scene, cfg: SeedstoneConfig) {
-    this.cfg = cfg.gem;
-    const gem = cfg.gem;
+  constructor(scene: THREE.Scene, gem: GemPart) {
+    this.cfg = gem;
 
     const geometry = this._buildGeometry(gem);
     this.geometrySig = geometrySignature(gem);
@@ -59,7 +58,7 @@ export class Gem {
     scene.add(this.mesh);
   }
 
-  private _buildGeometry(gem: GemConfig): THREE.BufferGeometry {
+  private _buildGeometry(gem: GemPart): THREE.BufferGeometry {
     const geometry = buildGeometry(gem.cut);
     applyDistortions(geometry, gem.distortion);
     return geometry;
@@ -67,7 +66,7 @@ export class Gem {
 
   /** Patch the colour + every scalar material property in place (uniform-only
    *  updates — no shader recompile). */
-  private _applyMaterial(gem: GemConfig): void {
+  private _applyMaterial(gem: GemPart): void {
     Object.assign(this.material, gem.material);
     this.material.color.setHSL(
       gem.hue / 360,
@@ -77,9 +76,7 @@ export class Gem {
     this.material.attenuationColor.setHSL(gem.hue / 360, 1.0, gem.attenuationLightness);
   }
 
-  update(cfg: SeedstoneConfig): void {
-    const gem = cfg.gem;
-
+  update(gem: GemPart): void {
     const sig = geometrySignature(gem);
     if (sig !== this.geometrySig) {
       const geometry = this._buildGeometry(gem);

@@ -14,7 +14,7 @@ function geometryGlob() {
   return {
     name: "geometry-glob",
     transform(code, id) {
-      if (!id.endsWith(path.join("src", "geometries", "index.ts"))) return null;
+      if (!id.endsWith(path.join("src", "gem", "geometries", "index.ts"))) return null;
 
       const globCall =
         /import\.meta\.glob(?:<[^>]*>)?\(['"]\.\/\*\.ts['"],\s*\{\s*eager:\s*true,\s*import:\s*['"]default['"],\s*\}\)/m;
