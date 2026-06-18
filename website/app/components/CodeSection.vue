@@ -1,22 +1,37 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { computed, ref, watch } from "vue";
 
 const copiedInstall = ref(false);
 const copiedUsage = ref(false);
 const usageHtml = ref<string | null>(null);
+const { active } = useActiveUseCase();
 
 const installCmd = "npm install seedstone";
 
-const usageCode = `import { SeedstoneRenderer } from 'seedstone';
+const usageCode = computed(() => {
+  if (active.value.uc.id === "gem")
+    return `import { SeedstoneRenderer } from 'seedstone';
 
 new SeedstoneRenderer('alice', {
   container: document.getElementById('gem'),
 });`;
+  return `import { ${active.value.uc.id === "meowtar" ? "catUseCase" : "useCase"} } from 'seedstone';
 
-onMounted(async () => {
-  const { codeToHtml } = await import("shiki");
-  usageHtml.value = await codeToHtml(usageCode, { lang: "javascript", theme: "one-dark-pro" });
+${active.value.uc.id === "meowtar" ? "catUseCase" : "useCase"}.mount(
+  document.getElementById('avatar'),
+  'alice',
+);`;
 });
+
+async function highlightUsage(): Promise<void> {
+  const { codeToHtml } = await import("shiki");
+  usageHtml.value = await codeToHtml(usageCode.value, {
+    lang: "javascript",
+    theme: "one-dark-pro",
+  });
+}
+
+watch(usageCode, () => highlightUsage(), { immediate: true });
 
 async function copyInstall() {
   await navigator.clipboard.writeText(installCmd);
@@ -27,7 +42,7 @@ async function copyInstall() {
 }
 
 async function copyUsage() {
-  await navigator.clipboard.writeText(usageCode);
+  await navigator.clipboard.writeText(usageCode.value);
   copiedUsage.value = true;
   setTimeout(() => {
     copiedUsage.value = false;

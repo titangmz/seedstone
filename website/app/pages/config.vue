@@ -1,12 +1,6 @@
 <script setup lang="ts">
-import { reactive, ref, computed, onMounted, onBeforeUnmount, useTemplateRef } from "vue";
-import type {
-  SeedstoneRenderer,
-  ConstantTrait,
-  SeededTrait,
-  PickTrait,
-  ControlBounds,
-} from "seedstone";
+import { reactive, ref, computed, onMounted, onBeforeUnmount, useTemplateRef, watch } from "vue";
+import type { Mounted, ConstantTrait, SeededTrait, PickTrait, ControlBounds } from "seedstone";
 
 useSeoMeta({ title: "Seedstone — Config lab", robots: "noindex" });
 
@@ -36,6 +30,7 @@ interface Section {
 const SEED_DRIVEN = "";
 
 const containerRef = useTemplateRef<HTMLDivElement>("container");
+const { active } = useActiveUseCase();
 const seed = ref("");
 const loaded = ref(false);
 const copied = ref(false);
@@ -46,7 +41,7 @@ const defaults = reactive<Record<string, number | string>>({});
 const modes = reactive<Record<string, "config" | "dna">>({});
 const defModes = reactive<Record<string, "config" | "dna">>({});
 
-let gem: SeedstoneRenderer | null = null;
+let mounted: Mounted | null = null;
 let ro: ResizeObserver | null = null;
 let applyTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -216,7 +211,7 @@ const overridesCode = computed(() => {
 
 function scheduleApply(): void {
   clearTimeout(applyTimer);
-  applyTimer = setTimeout(() => gem?.setConfig(overrides.value), 120);
+  applyTimer = setTimeout(() => mounted?.setConfig(overrides.value), 120);
 }
 
 function resetAll(): void {
@@ -234,20 +229,38 @@ async function copyOverrides(): Promise<void> {
 }
 
 function onSeedInput(): void {
-  gem?.update(seed.value.trim() || "seedstone");
+  mounted?.update(seed.value.trim() || "seedstone");
 }
 
 // ── Lifecycle ─────────────────────────────────────────────────────────────────
 
-onMounted(async () => {
-  const { SeedstoneRenderer, configSchema, controls } = await import("seedstone");
-  controlsMap = controls;
+function clearRecord<T>(record: Record<string, T>): void {
+  for (const key of Object.keys(record)) delete record[key];
+}
+
+function resetLabState(): void {
+  sections.value = [];
+  clearRecord(values);
+  clearRecord(defaults);
+  clearRecord(modes);
+  clearRecord(defModes);
+  clearRecord(ranges);
+}
+
+function initActiveUseCase(): void {
+  if (!containerRef.value) return;
+  loaded.value = false;
+  clearTimeout(applyTimer);
+  mounted?.destroy();
+  containerRef.value.innerHTML = "";
+  resetLabState();
+  controlsMap = active.value.uc.controls ?? {};
 
   // Walk the trait tree to discover every knob — no manual list. constant() knobs
   // get sliders (bounds from controls); seeded() knobs render as seed-driven with
   // a toggle to pin them; pick() knobs get a select. Add/remove a knob or flip its
-  // mode by editing constant()/seeded()/pick() in src/gem/traits.ts.
-  const allKnobs = collectKnobs(configSchema);
+  // mode by editing constant()/seeded()/pick() in the active use case's traits.
+  const allKnobs = collectKnobs(active.value.uc.traits);
 
   const groups = new Map<string, Knob[]>();
   for (const knob of allKnobs) {
@@ -272,23 +285,30 @@ onMounted(async () => {
   loaded.value = true;
 
   const size = containerRef.value!.clientWidth || 420;
-  gem = new SeedstoneRenderer("seedstone", {
-    container: containerRef.value!,
+  mounted = active.value.uc.mount(containerRef.value!, seed.value.trim() || "seedstone", {
     width: size,
     height: size,
     background: null,
   });
+}
 
+onMounted(() => {
+  initActiveUseCase();
   ro = new ResizeObserver(() => {
     const s = containerRef.value?.clientWidth;
-    if (gem && s) gem.resize(s, s);
+    if (mounted?.resize && s) mounted.resize(s, s);
   });
   ro.observe(containerRef.value!);
 });
 
+watch(
+  () => active.value.uc.id,
+  () => initActiveUseCase(),
+);
+
 onBeforeUnmount(() => {
   clearTimeout(applyTimer);
-  gem?.destroy();
+  mounted?.destroy();
   ro?.disconnect();
 });
 </script>
@@ -299,8 +319,9 @@ onBeforeUnmount(() => {
       <NuxtLink to="/" class="back-link">← seedstone</NuxtLink>
       <h1>Config lab</h1>
       <p class="sub">
-        Tune the renderer live, then copy the <code>config</code> override for
-        <code>new SeedstoneRenderer()</code>.
+        Tune the active use case live, then copy the <code>config</code> override for
+        <code>{{ active.uc.name }}</code
+        >.
       </p>
     </header>
 
@@ -479,6 +500,11 @@ onBeforeUnmount(() => {
   background: rgba(0, 0, 0, 0.25);
 }
 .gem-box :deep(canvas) {
+  width: 100% !important;
+  height: 100% !important;
+}
+.gem-box :deep(svg) {
+  display: block;
   width: 100% !important;
   height: 100% !important;
 }

@@ -2,6 +2,7 @@
 import { ref, onMounted, onBeforeUnmount } from "vue";
 
 const scrolled = ref(false);
+const { siteUseCases, activeId, setActive } = useActiveUseCase();
 
 function onScroll() {
   scrolled.value = window.scrollY > 20;
@@ -54,6 +55,14 @@ function scrollTo(id: string, e: MouseEvent) {
       </div>
 
       <div class="nav-cta">
+        <label class="usecase-picker">
+          <span class="sr-only">Use case</span>
+          <select :value="activeId" @change="setActive(($event.target as HTMLSelectElement).value)">
+            <option v-for="entry in siteUseCases" :key="entry.uc.id" :value="entry.uc.id">
+              {{ entry.uc.name }}
+            </option>
+          </select>
+        </label>
         <a
           href="https://github.com/titangmz/seedstone"
           target="_blank"
@@ -141,6 +150,37 @@ function scrollTo(id: string, e: MouseEvent) {
   justify-self: end;
 }
 
+.usecase-picker {
+  position: relative;
+}
+.usecase-picker select {
+  height: 36px;
+  max-width: 150px;
+  border-radius: 9px;
+  border: 1px solid var(--line-2);
+  background: oklch(0.1 0.01 280 / 0.5);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  padding: 0 28px 0 10px;
+  outline: none;
+  cursor: pointer;
+}
+.usecase-picker select:focus {
+  border-color: oklch(0.7 0.15 290 / 0.55);
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .nav-icon-btn {
   width: 36px;
   height: 36px;
@@ -196,6 +236,9 @@ function scrollTo(id: string, e: MouseEvent) {
   }
   .nav-cta {
     justify-content: flex-end;
+  }
+  .usecase-picker select {
+    max-width: 118px;
   }
 }
 </style>

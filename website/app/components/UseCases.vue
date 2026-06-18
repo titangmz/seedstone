@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount } from "vue";
+import { nextTick, onBeforeUnmount, onMounted, watch } from "vue";
+import type { Mounted } from "seedstone";
+
+const { active } = useActiveUseCase();
 
 const USE_CASES = [
   {
@@ -40,26 +43,29 @@ const USE_CASES = [
   },
 ];
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ucGems: any[] = [];
+const thumbnails: Mounted[] = [];
 let io: IntersectionObserver | null = null;
 
-onMounted(() => {
+function destroyThumbnails(): void {
+  while (thumbnails.length) thumbnails.pop()?.destroy();
+}
+
+function setupObserver(): void {
+  io?.disconnect();
+  destroyThumbnails();
   // Build each thumbnail's gem only as it nears the viewport. These sit below
   // the fold, so this keeps their (synchronous) construction off the critical
-  // first second, where it would otherwise starve the hero gem's animation.
+  // first second, where it would otherwise starve the hero animation.
   io = new IntersectionObserver(
     (entries) =>
-      entries.forEach(async (entry) => {
+      entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
         const el = entry.target as HTMLDivElement;
         io!.unobserve(el); // build once
-        const { SeedstoneRenderer } = await import("seedstone");
         if (!el.isConnected) return;
         const s = el.clientWidth || 104;
-        ucGems.push(
-          new SeedstoneRenderer(el.dataset.ucSeed!, {
-            container: el,
+        thumbnails.push(
+          active.value.uc.mount(el, el.dataset.ucSeed!, {
             width: s,
             height: s,
             background: null,
@@ -70,11 +76,23 @@ onMounted(() => {
     { rootMargin: "200px" }, // start building just before they scroll in
   );
   document.querySelectorAll<HTMLDivElement>("[data-uc-seed]").forEach((el) => io!.observe(el));
+}
+
+onMounted(() => {
+  setupObserver();
 });
+
+watch(
+  () => active.value.uc.id,
+  async () => {
+    await nextTick();
+    setupObserver();
+  },
+);
 
 onBeforeUnmount(() => {
   io?.disconnect();
-  ucGems.forEach((g) => g.destroy());
+  destroyThumbnails();
 });
 </script>
 
@@ -166,6 +184,11 @@ onBeforeUnmount(() => {
   position: relative;
 }
 .ucg :deep(canvas) {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+.ucg :deep(svg) {
   display: block;
   width: 100% !important;
   height: 100% !important;

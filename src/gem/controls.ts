@@ -9,11 +9,7 @@
  * their own range, so they never need an entry.
  */
 
-export interface ControlBounds {
-  min: number;
-  max: number;
-  step: number;
-}
+import type { ControlBounds } from "../kit/index";
 
 export const controls: Record<string, ControlBounds> = {
   "camera.fov": { min: 10, max: 80, step: 1 },

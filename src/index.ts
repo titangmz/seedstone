@@ -11,6 +11,7 @@
 
 export { SeedstoneRenderer } from "./gem/renderer";
 export type { SeedstoneOptions } from "./gem/renderer";
+export { gemUseCase } from "./gem/usecase";
 
 // The gem's trait declaration. `configSchema` is the back-compat alias.
 export { gemTraits, gemTraits as configSchema } from "./gem/traits";
@@ -22,8 +23,24 @@ export type {
   GemTraits as SeedstoneSchema, // the raw trait tree (traits still wrapped)
 } from "./gem/traits";
 export type { GemOverrides as SeedstoneConfigOverrides } from "./gem/renderer";
-export type { ControlBounds } from "./gem/controls";
 export type { GemCutModule, GemCut } from "./gem/geometries/index";
+
+// ── Meowtar: render a deterministic SVG cat avatar from a string ─────────────
+
+export { catUseCase, renderMeowtar, resolveMeowtar, meowtarTraits, Meowtar } from "./meowtar/index";
+
+export type {
+  MeowtarTraits,
+  MeowtarValues,
+  MeowtarOverrides,
+  MeowtarConfig,
+  Palette,
+} from "./meowtar/index";
+
+// ── Kit: the uniform use-case contract and helpers ───────────────────────────
+
+export { mountString, defineUseCase } from "./kit/index";
+export type { UseCase, Mounted, MountOptions, ControlBounds } from "./kit/index";
 
 // ── Core: the derivation engine (zero three.js) ───────────────────────────────
 // Import these to declare your own traits and "just get a config" from a seed.

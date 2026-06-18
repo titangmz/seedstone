@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount } from "vue";
+import { computed, onMounted, onBeforeUnmount } from "vue";
+
+const { active } = useActiveUseCase();
+const activeNoun = computed(() => active.value.noun ?? active.value.uc.name.toLowerCase());
 
 useHead({
   link: [
@@ -13,11 +16,10 @@ useHead({
 });
 
 useSeoMeta({
-  title: "Seedstone — Every string is a unique gemstone",
-  description:
-    "Render a 3D rotating gemstone from any string. Deterministic, WebGL-powered, Three.js.",
+  title: "Seedstone — Every string is a unique visual identity",
+  description: "Render deterministic visual identities from any string.",
   ogTitle: "Seedstone",
-  ogDescription: "Every string is a unique gemstone",
+  ogDescription: "Every string is a unique visual identity",
 });
 
 let revealObs: IntersectionObserver | null = null;
@@ -48,7 +50,7 @@ onBeforeUnmount(() => revealObs?.disconnect());
     <section id="usage" class="section reveal">
       <div class="section-hd">
         <div class="section-ey">Get started</div>
-        <h2 class="section-h2">Two lines to a gem</h2>
+        <h2 class="section-h2">Two lines to a {{ activeNoun }}</h2>
       </div>
       <CodeSection />
     </section>
