@@ -1,5 +1,5 @@
 /**
- * The derivation engine — zero deps, never imports three.js.
+ * The derivation engine
  *
  * Declare a tree of **traits** (each value either fixed or seed-driven), hand it
  * a seed, and `derive` resolves it to a plain config object. Every use case (the

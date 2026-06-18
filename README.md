@@ -84,6 +84,10 @@ pnpm build  # production bundle into dist/
 pnpm test   # build + run test suite
 ```
 
+## Acknowledgements
+
+The repo also bundles [`meowtar`](src/meowtar/) — a deterministic SVG **cat avatar** built on the same seed engine. It was inspired by [**@jaameypr**](https://github.com/jaameypr)'s [catsum](https://github.com/jaameypr/catsum) fork. Thanks to [@jaameypr](https://github.com/jaameypr) for the idea.
+
 ## License
 
 [MIT](LICENSE)

@@ -1,12 +1,10 @@
 /**
  * seedstone — public entry point.
  *
- * The headline API renders a 3D gem from a string (`SeedstoneRenderer`). Under
- * it sit three reusable layers, each exported for advanced use and for building
- * other use cases:
- *   - the derivation engine (`constant`/`seeded`/`pick`/`derive`/`merge`) — zero three.js
- *   - the 3D toolkit (`Viewer` + `SceneFactory`)
- *   - the gem use case (its traits, controls, geometry registry)
+ * The headline API renders a 3D gem from a string (`SeedstoneRenderer`). Under it
+ * sits the derivation engine (`constant`/`seeded`/`pick`/`derive`/`merge`) — a
+ * zero-dependency, three.js-free core, exported for advanced use and for building
+ * other use cases from a seed.
  */
 
 // ── Gem: render a gem from a string ───────────────────────────────────────────
@@ -25,6 +23,7 @@ export type {
 } from "./gem/traits";
 export type { GemOverrides as SeedstoneConfigOverrides } from "./gem/renderer";
 export type { ControlBounds } from "./gem/controls";
+export type { GemCutModule, GemCut } from "./gem/geometries/index";
 
 // ── Core: the derivation engine (zero three.js) ───────────────────────────────
 // Import these to declare your own traits and "just get a config" from a seed.
@@ -53,26 +52,3 @@ export type {
   Config,
   Override,
 } from "./core/index";
-
-// ── Three: the 3D toolkit ─────────────────────────────────────────────────────
-// The generic Viewer + reusable scene blocks any 3D use case builds on.
-
-export { Viewer, Lights, Environment, Sparkles } from "./three/index";
-export type {
-  ViewerOptions,
-  SceneFactory,
-  Scene,
-  SceneContext,
-  ViewerConfig,
-  LightsConfig,
-  LightsInputs,
-  OrbitConfig,
-  EnvironmentConfig,
-  EnvironmentInputs,
-  SparklesConfig,
-} from "./three/index";
-
-// ── Gem internals (advanced) ──────────────────────────────────────────────────
-
-export { gemSceneFactory } from "./gem/scene";
-export type { GemCutModule, GemCut } from "./gem/geometries/index";

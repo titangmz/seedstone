@@ -1,10 +1,5 @@
 /**
  * Deterministic primitives — the foundation of seed → output mapping.
- *
- * Pure and three.js-free, so image/data use cases can derive a config and place
- * points without pulling in a renderer. Every consumer (the param engine, the
- * gem's sparkle scatter, the gem's vertex distortion) shares these, so a seed
- * always maps to the same result regardless of which use case asks.
  */
 
 function djb2(str: string): number {
