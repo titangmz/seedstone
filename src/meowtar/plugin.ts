@@ -4,7 +4,7 @@ import { drawCat, type MeowtarConfig } from "./draw";
 
 export const catPlugin = definePlugin<MeowtarTraits, MeowtarConfig>({
   id: "meowtar",
-  name: "Cat avatar",
+  name: "Cats",
   traits: meowtarTraits,
   lab: buildLabControls(meowtarTraits),
   mount: (container, seed, options = {}) =>

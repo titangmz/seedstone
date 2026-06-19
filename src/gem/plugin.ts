@@ -5,7 +5,7 @@ import { gemLab } from "./lab";
 
 export const gemPlugin = definePlugin<GemTraits, GemConfig>({
   id: "gem",
-  name: "Gemstone",
+  name: "Gems",
   traits: gemTraits,
   lab: gemLab,
   mount: (container, seed, options = {}) =>
