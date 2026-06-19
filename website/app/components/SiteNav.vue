@@ -3,6 +3,7 @@ import { ref, onMounted, onBeforeUnmount } from "vue";
 
 const scrolled = ref(false);
 const { sitePlugins, activeId, setActive } = useActivePlugin();
+const route = useRoute();
 
 function onScroll() {
   scrolled.value = window.scrollY > 20;
@@ -12,14 +13,18 @@ onBeforeUnmount(() => window.removeEventListener("scroll", onScroll));
 
 function scrollTo(id: string, e: MouseEvent) {
   e.preventDefault();
-  document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  if (route.path === "/") {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  } else {
+    navigateTo(`/#${id}`);
+  }
 }
 </script>
 
 <template>
   <nav :class="['site-nav', { scrolled }]">
     <div class="nav-in">
-      <a class="brand" href="#hero" @click="scrollTo('hero', $event)">
+      <a class="brand" href="/#hero" @click="scrollTo('hero', $event)">
         <svg class="brand-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
           <defs>
             <linearGradient id="gm" x1="0" y1="0" x2="1" y2="1">
@@ -55,8 +60,7 @@ function scrollTo(id: string, e: MouseEvent) {
       </div>
 
       <div class="nav-cta">
-        <label class="usecase-picker">
-          <span class="sr-only">Use case</span>
+        <label class="plugin-picker">
           <select :value="activeId" @change="setActive(($event.target as HTMLSelectElement).value)">
             <option v-for="entry in sitePlugins" :key="entry.plugin.id" :value="entry.plugin.id">
               {{ entry.plugin.name }}
@@ -76,7 +80,7 @@ function scrollTo(id: string, e: MouseEvent) {
             />
           </svg>
         </a>
-        <button class="nav-primary" @click="navigateTo('/config')">Forge</button>
+        <button class="nav-primary" @click="navigateTo('/lab')">Trait Lab</button>
       </div>
     </div>
   </nav>
@@ -150,35 +154,44 @@ function scrollTo(id: string, e: MouseEvent) {
   justify-self: end;
 }
 
-.usecase-picker {
+.plugin-picker {
   position: relative;
+  display: flex;
+  align-items: center;
 }
-.usecase-picker select {
-  height: 36px;
-  max-width: 150px;
+.plugin-picker::after {
+  content: "";
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid #9491a3;
+  pointer-events: none;
+}
+.plugin-picker select {
+  height: 34px;
+  padding: 0 30px 0 11px;
   border-radius: 9px;
   border: 1px solid var(--line-2);
   background: oklch(0.1 0.01 280 / 0.5);
   color: var(--text);
   font: inherit;
   font-size: 13px;
-  padding: 0 28px 0 10px;
   outline: none;
   cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
 }
-.usecase-picker select:focus {
+.plugin-picker select:focus {
   border-color: oklch(0.7 0.15 290 / 0.55);
 }
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+.plugin-picker select:focus + .plugin-picker::after,
+.plugin-picker:focus-within::after {
+  border-top-color: oklch(0.75 0.15 290);
 }
 
 .nav-icon-btn {
@@ -228,17 +241,9 @@ function scrollTo(id: string, e: MouseEvent) {
 }
 
 @media (max-width: 860px) {
-  .nav-links {
-    display: none;
-  }
-  .nav-in {
-    grid-template-columns: auto 1fr;
-  }
-  .nav-cta {
-    justify-content: flex-end;
-  }
-  .usecase-picker select {
-    max-width: 118px;
-  }
+  .nav-links { display: none; }
+  .nav-in { grid-template-columns: auto 1fr; }
+  .nav-cta { justify-content: flex-end; }
+  .plugin-picker select { max-width: 118px; }
 }
 </style>

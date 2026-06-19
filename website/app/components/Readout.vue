@@ -38,11 +38,11 @@ const summary = computed(() =>
 
     <div v-for="s in summary.stats ?? []" :key="s.label" class="ro-stat">
       <span class="ro-k">{{ s.label }}</span>
-      <span v-if="typeof s.pct === 'number'" class="ro-track"
-        ><i :style="{ width: s.pct + '%' }"></i
-      ></span>
-      <span v-else class="ro-track muted"></span>
-      <span class="ro-val">{{ s.value }}</span>
+      <template v-if="typeof s.pct === 'number'">
+        <span class="ro-track"><i :style="{ width: s.pct + '%' }"></i></span>
+        <span class="ro-val">{{ s.value }}</span>
+      </template>
+      <span v-else class="ro-tag">{{ s.value }}</span>
     </div>
   </aside>
 </template>
@@ -168,9 +168,6 @@ const summary = computed(() =>
   background: var(--panel-3);
   overflow: hidden;
 }
-.ro-track.muted {
-  opacity: 0.42;
-}
 .ro-track i {
   display: block;
   height: 100%;
@@ -187,5 +184,22 @@ const summary = computed(() =>
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.ro-tag {
+  grid-column: 2 / -1;
+  justify-self: end;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 2px 7px;
+  border-radius: 5px;
+  border: 1px solid oklch(0.6 0.15 290 / 0.35);
+  background: oklch(0.6 0.15 290 / 0.08);
+  color: oklch(0.8 0.1 290);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 </style>

@@ -41,7 +41,6 @@ function gemSummary(config: unknown): Summary {
   const fire = c?.gem.material.iridescence ?? 0.5;
   const speed = c?.gem.speed ?? 1;
   const perfection = c?.gem.distortion.perfection ?? 0.5;
-  const tilt = Math.round((c?.gem.tilt ?? 0) * (180 / Math.PI));
   const grade =
     perfection >= 0.88
       ? "Imperial"
@@ -55,18 +54,14 @@ function gemSummary(config: unknown): Summary {
 
   return {
     title: c?.gem.cut ?? "crystal",
-    subtitle: `${grade} grade · tilt ${tilt >= 0 ? "+" : ""}${tilt}deg`,
     swatch: `oklch(0.62 ${(0.16 + sat * 0.1).toFixed(3)} ${hue.toFixed(1)})`,
     stats: [
+      { label: "Grade", value: grade },
       { label: "Saturation", pct: Math.round(sat * 100), value: `${Math.round(sat * 100)}%` },
       { label: "IOR", pct: statPct(ior, 1.5, 2.8), value: ior.toFixed(2) },
       { label: "Fire", pct: Math.round(fire * 100), value: `${Math.round(fire * 100)}%` },
       { label: "Speed", pct: statPct(speed, 0.3, 2), value: `x${speed.toFixed(2)}` },
-      {
-        label: "Perfection",
-        pct: Math.round(perfection * 100),
-        value: `${Math.round(perfection * 100)}%`,
-      },
+      { label: "Perfection", pct: Math.round(perfection * 100), value: `${Math.round(perfection * 100)}%` },
     ],
   };
 }
@@ -75,7 +70,6 @@ function catSummary(config: unknown): Summary {
   const c = config as MeowtarConfig | null;
   return {
     title: c?.name ?? "Cat avatar",
-    subtitle: c ? `${c.coat.pattern} coat · ${c.mood} mood` : "procedural SVG companion",
     swatch: c?.palette.coat,
     stats: c
       ? [

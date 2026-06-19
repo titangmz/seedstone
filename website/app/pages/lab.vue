@@ -3,7 +3,7 @@ import { ref, watch, onMounted, onBeforeUnmount, useTemplateRef } from "vue";
 import type { View } from "seedstone";
 import { useLabState } from "~/composables/useLabState";
 
-useSeoMeta({ title: "Seedstone — Config lab", robots: "noindex" });
+useSeoMeta({ title: "Seedstone — Labs", robots: "noindex" });
 
 const containerRef = useTemplateRef<HTMLDivElement>("container");
 const { active } = useActivePlugin();
@@ -67,16 +67,8 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
+  <SiteNav />
   <div class="config-page">
-    <header class="header">
-      <NuxtLink to="/" class="back-link">← seedstone</NuxtLink>
-      <h1>Config lab</h1>
-      <p class="sub">
-        Tune the active use case live, then copy the <code>config</code> override for
-        <code>{{ active.plugin.name }}</code>.
-      </p>
-    </header>
-
     <div class="layout">
       <!-- Left: preview + output -->
       <aside class="preview">
@@ -149,26 +141,8 @@ onBeforeUnmount(() => {
   min-height: 100vh;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 32px 24px 80px;
+  padding: 88px 24px 80px;
 }
-
-.header { margin-bottom: 28px; }
-
-.back-link { font-size: 0.8rem; color: var(--muted); text-decoration: none; }
-.back-link:hover { color: var(--accent); }
-
-.header h1 {
-  margin: 10px 0 6px;
-  font-size: 1.9rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  background: linear-gradient(135deg, #f3e8ff, #c084fc 60%, #818cf8);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.sub { margin: 0; font-size: 0.85rem; color: rgba(255, 255, 255, 0.4); }
-.sub code { font-family: "Consolas", "SF Mono", monospace; color: var(--accent); }
 
 .layout { display: flex; flex-direction: column; gap: 28px; }
 @media (min-width: 900px) {
