@@ -14,7 +14,7 @@
  *      export default mod;
  *
  * That's it — no edits to this file required.
- * The cut becomes available immediately and is picked by the DNA system.
+ * The cut becomes available immediately and is picked by the system.
  */
 
 import * as THREE from "three";

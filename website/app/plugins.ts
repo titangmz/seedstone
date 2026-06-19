@@ -1,4 +1,4 @@
-import { catPlugin, gemPlugin, type MeowtarConfig, type SeedstoneConfig, type Plugin } from "seedstone";
+import { catPlugin, gemPlugin, type MeowtarConfig, type GemConfig, type Plugin } from "seedstone";
 
 export interface SummaryStat {
   label: string;
@@ -13,8 +13,6 @@ export interface Summary {
   stats?: SummaryStat[];
 }
 
-/** A plugin plus the website-only presentation that wraps it. The plugin itself
- *  (from the package) is purely functional; everything here lives in the site. */
 export interface SitePlugin {
   plugin: Plugin;
   noun?: string;
@@ -31,57 +29,12 @@ export const DEFAULT_SAMPLE_SEEDS = [
   "DOC-99812",
 ];
 
-const GEM_NAME_RANGES: Array<{ a: number; b: number; names: string[] }> = [
-  { a: 345, b: 20, names: ["ruby", "garnet", "rhodolite", "rubellite", "pyrope"] },
-  { a: 20, b: 46, names: ["spessartite", "padparadscha", "fire opal", "hessonite", "sunstone"] },
-  { a: 46, b: 66, names: ["citrine", "imperial topaz", "heliodor", "amber", "zircon"] },
-  { a: 66, b: 150, names: ["peridot", "chrysoberyl", "sphene", "prehnite", "olivine"] },
-  { a: 150, b: 176, names: ["emerald", "tsavorite", "jadeite", "dioptase", "uvarovite"] },
-  { a: 176, b: 205, names: ["paraiba", "apatite", "larimar", "aquamarine", "grandidierite"] },
-  { a: 205, b: 255, names: ["sapphire", "kyanite", "benitoite", "azurite", "lazulite"] },
-  { a: 255, b: 292, names: ["tanzanite", "iolite", "sodalite", "sugilite", "lapis"] },
-  { a: 292, b: 345, names: ["amethyst", "charoite", "kunzite", "morganite", "spinel"] },
-];
-
-function cyrb53(str: string, seed = 0): number {
-  let h1 = 0xdeadbeef ^ seed;
-  let h2 = 0x41c6ce57 ^ seed;
-  for (let i = 0, ch: number; i < str.length; i++) {
-    ch = str.charCodeAt(i);
-    h1 = Math.imul(h1 ^ ch, 2654435761);
-    h2 = Math.imul(h2 ^ ch, 1597334677);
-  }
-  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-  return 4294967296 * (2097151 & h2) + (h1 >>> 0);
-}
-
-function mkrng(seed: number): () => number {
-  let a = seed >>> 0;
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
 function statPct(v: number, lo: number, hi: number): number {
   return Math.max(4, Math.min(100, Math.round(((v - lo) / (hi - lo)) * 100)));
 }
 
-function deriveGemName(seed: string, hue: number): string {
-  const r = mkrng(cyrb53(seed) >>> 0);
-  const h = ((hue % 360) + 360) % 360;
-  for (const { a, b, names } of GEM_NAME_RANGES) {
-    if (a < b ? h >= a && h < b : h >= a || h < b)
-      return names[Math.floor(r() * names.length)] ?? "crystal";
-  }
-  return "crystal";
-}
-
-function gemSummary(config: unknown, seed: string): Summary {
-  const c = config as SeedstoneConfig | null;
+function gemSummary(config: unknown): Summary {
+  const c = config as GemConfig | null;
   const hue = c?.gem.hue ?? 270;
   const sat = c?.gem.saturation ?? 0.8;
   const ior = c?.gem.material.ior ?? 2;
@@ -101,7 +54,7 @@ function gemSummary(config: unknown, seed: string): Summary {
             : "Refined";
 
   return {
-    title: deriveGemName(seed, hue),
+    title: c?.gem.cut ?? "crystal",
     subtitle: `${grade} grade · tilt ${tilt >= 0 ? "+" : ""}${tilt}deg`,
     swatch: `oklch(0.62 ${(0.16 + sat * 0.1).toFixed(3)} ${hue.toFixed(1)})`,
     stats: [
@@ -148,8 +101,6 @@ function catSummary(config: unknown): Summary {
   };
 }
 
-/** Generic readout for a plugin without a bespoke `summarize` — walks the
- *  resolved config and shows the first handful of leaf values. */
 export function fallbackSummary(config: unknown, seed: string, plugin: Plugin): Summary {
   const stats: SummaryStat[] = [];
   const walk = (value: unknown, path: string[] = []) => {

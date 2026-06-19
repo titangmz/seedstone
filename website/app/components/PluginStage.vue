@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from "vue";
-import type { Mounted, Plugin } from "seedstone";
+import type { View, Plugin } from "seedstone";
 
 const props = defineProps<{
   seed: string;
@@ -14,7 +14,7 @@ const emit = defineEmits<{ config: [config: unknown] }>();
 const containerRef = useTemplateRef<HTMLDivElement>("container");
 const loading = ref(true);
 
-let instance: Mounted | null = null;
+let instance: View | null = null;
 let ro: ResizeObserver | null = null;
 let mountId = 0;
 

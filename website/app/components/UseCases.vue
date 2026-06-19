@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, onMounted, watch } from "vue";
-import type { Mounted } from "seedstone";
+import type { View } from "seedstone";
 
 const { active } = useActivePlugin();
 
@@ -43,7 +43,7 @@ const USE_CASES = [
   },
 ];
 
-const thumbnails: Mounted[] = [];
+const thumbnails: View[] = [];
 let io: IntersectionObserver | null = null;
 
 function destroyThumbnails(): void {
