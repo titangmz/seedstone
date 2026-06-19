@@ -15,6 +15,7 @@ export interface Summary {
 
 export interface SitePlugin {
   plugin: Plugin;
+  importName?: string;
   noun?: string;
   lede?: string;
   sampleSeeds?: string[];
@@ -121,6 +122,7 @@ export function fallbackSummary(config: unknown, seed: string, plugin: Plugin): 
 export const sitePlugins: SitePlugin[] = [
   {
     plugin: gemPlugin,
+    importName: "gemPlugin",
     noun: "gemstone",
     lede: "Type a username, wallet, company, or AI agent — Seedstone forges a unique 3D gem as its permanent visual identity.",
     sampleSeeds: DEFAULT_SAMPLE_SEEDS,
@@ -128,6 +130,7 @@ export const sitePlugins: SitePlugin[] = [
   },
   {
     plugin: catPlugin,
+    importName: "catPlugin",
     noun: "cat",
     lede: "Type a username, wallet, company, or AI agent — Seedstone draws a deterministic SVG cat as its permanent visual identity.",
     sampleSeeds: ["@satoshi", "Mochi-77", "0x71C7...976F", "Patchwork Labs", "DOC-99812"],

@@ -9,7 +9,7 @@ const { active } = useActivePlugin();
 const installCmd = "npm install seedstone";
 
 const usageCode = computed(() => {
-  const name = active.value.plugin.id === "meowtar" ? "catPlugin" : "gemPlugin";
+  const name = active.value.importName ?? "plugin";
   return `import { create, ${name} } from 'seedstone';
 
 const view = create(${name}, '#avatar', 'alice');`;
