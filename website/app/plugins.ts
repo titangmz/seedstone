@@ -1,4 +1,12 @@
-import { catPlugin, gemPlugin, type MeowtarConfig, type GemConfig, type Plugin } from "seedstone";
+import {
+  catPlugin,
+  gemPlugin,
+  foxPlugin,
+  type MeowtarConfig,
+  type GemConfig,
+  type FoxConfig,
+  type Plugin,
+} from "seedstone";
 
 export interface SummaryStat {
   label: string;
@@ -101,6 +109,35 @@ function catSummary(config: unknown): Summary {
   };
 }
 
+function foxSummary(config: unknown): Summary {
+  const c = config as FoxConfig | null;
+  return {
+    title: c?.name ?? "Fox",
+    swatch: c?.palette.coat,
+    stats: c
+      ? [
+          {
+            label: "Coat",
+            value: `${Math.round(c.coat.hue)}deg`,
+            pct: statPct(c.coat.hue, 0, 360),
+          },
+          {
+            label: "Eyes",
+            value: `${Math.round(c.eyes.hue)}deg`,
+            pct: statPct(c.eyes.hue, 18, 55),
+          },
+          { label: "Pattern", value: c.coat.pattern },
+          { label: "Expression", value: c.expression },
+          {
+            label: "Ruff",
+            value: `${Math.round(c.face.ruff * 100)}%`,
+            pct: Math.round(c.face.ruff * 100),
+          },
+        ]
+      : [],
+  };
+}
+
 export function fallbackSummary(config: unknown, seed: string, plugin: Plugin): Summary {
   const stats: SummaryStat[] = [];
   const walk = (value: unknown, path: string[] = []) => {
@@ -136,5 +173,13 @@ export const sitePlugins: SitePlugin[] = [
     lede: "Type a username, wallet, company, or AI agent — Seedstone draws a deterministic SVG cat as its permanent visual identity.",
     sampleSeeds: ["@satoshi", "Mochi-77", "0x71C7...976F", "Patchwork Labs", "DOC-99812"],
     summarize: catSummary,
+  },
+  {
+    plugin: foxPlugin,
+    importName: "foxPlugin",
+    noun: "fox",
+    lede: "Type a username, wallet, company, or AI agent — Seedstone draws a deterministic SVG fox as its permanent visual identity.",
+    sampleSeeds: ["@satoshi", "Reynard", "0x71C7...976F", "Foxglove Labs", "DOC-99812"],
+    summarize: foxSummary,
   },
 ];

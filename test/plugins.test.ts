@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { gemPlugin } from "../src/gem/index";
 import { catPlugin } from "../src/meowtar/index";
+import { foxPlugin } from "../src/fox/index";
 import { isSeeded, isConstant, isPick } from "../src/core/index";
 
 /** Every numeric trait path (seeded, or constant with a number value). */
@@ -27,6 +28,7 @@ function pickPaths(node: unknown, path: string[] = []): string[] {
 describe.each([
   ["gem", gemPlugin],
   ["cat", catPlugin],
+  ["fox", foxPlugin],
 ])("%s plugin", (_, plugin) => {
   it("has the functional shape", () => {
     expect(typeof plugin.id).toBe("string");

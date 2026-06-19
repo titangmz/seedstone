@@ -56,3 +56,7 @@ export type {
   MeowtarValues,
   Palette,
 } from "./meowtar/index";
+
+// Fox plugin (SVG via svg.js)
+export { foxPlugin } from "./fox/index";
+export type { FoxConfig, FoxTraits, FoxOverrides, FoxValues, FoxPalette } from "./fox/index";
