@@ -45,8 +45,9 @@ export interface CreateOptions {
 }
 
 /**
- * A plugin as a library consumer sees it — the complete functional surface for
- * rendering and tuning. `lab` is optional and only needed for the website lab UI.
+ * A plugin — a passive descriptor the runtime drives. Authors build one with
+ * `definePlugin`; users hand it to `create`. `lab` is optional and only needed
+ * for the website lab UI.
  */
 export interface Plugin<T extends Traits = Traits, C = unknown> {
   /** Stable identifier, e.g. `"gem"`. */
@@ -58,6 +59,8 @@ export interface Plugin<T extends Traits = Traits, C = unknown> {
   /** Lab UI controls: sliders for numeric traits, dropdowns for options traits.
    *  Only needed for the website lab — omit for production-only plugins. */
   lab?: LabControls;
-  /** Mount a live, seed-driven render into a container. */
+  /** Runtime hook implemented by plugin authors and invoked by `create`. It
+   *  receives a resolved, validated container. End users call
+   *  `create(plugin, target, seed)` rather than this directly. */
   mount(container: HTMLElement, seed: string, options?: CreateOptions): View<C>;
 }

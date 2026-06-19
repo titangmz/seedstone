@@ -9,19 +9,10 @@ const { active } = useActivePlugin();
 const installCmd = "npm install seedstone";
 
 const usageCode = computed(() => {
-  if (active.value.plugin.id === "gem")
-    return `import { SeedstoneRenderer } from 'seedstone';
+  const name = active.value.plugin.id === "meowtar" ? "catPlugin" : "gemPlugin";
+  return `import { create, ${name} } from 'seedstone';
 
-new SeedstoneRenderer('alice', {
-  container: document.getElementById('gem'),
-});`;
-  const name = active.value.plugin.id === "meowtar" ? "catPlugin" : "plugin";
-  return `import { ${name} } from 'seedstone';
-
-${name}.mount(
-  document.getElementById('avatar'),
-  'alice',
-);`;
+const view = create(${name}, '#avatar', 'alice');`;
 });
 
 async function highlightUsage(): Promise<void> {

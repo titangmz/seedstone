@@ -100,14 +100,13 @@ export type Config<T> =
  *   - `pick(options)` re-opens a pinned choice.
  * Plain-object branches recurse; arrays and primitive pass-throughs are unchanged.
  */
-export type Override<T> =
-  T extends Trait
-    ? Trait
-    : T extends readonly unknown[]
-      ? T
-      : T extends object
-        ? { [K in keyof T]?: Override<T[K]> }
-        : T;
+export type Override<T> = T extends Trait
+  ? Trait
+  : T extends readonly unknown[]
+    ? T
+    : T extends object
+      ? { [K in keyof T]?: Override<T[K]> }
+      : T;
 
 // ── Resolution ──────────────────────────────────────────────────────────────
 

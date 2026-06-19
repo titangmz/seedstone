@@ -241,9 +241,17 @@ function scrollTo(id: string, e: MouseEvent) {
 }
 
 @media (max-width: 860px) {
-  .nav-links { display: none; }
-  .nav-in { grid-template-columns: auto 1fr; }
-  .nav-cta { justify-content: flex-end; }
-  .plugin-picker select { max-width: 118px; }
+  .nav-links {
+    display: none;
+  }
+  .nav-in {
+    grid-template-columns: auto 1fr;
+  }
+  .nav-cta {
+    justify-content: flex-end;
+  }
+  .plugin-picker select {
+    max-width: 118px;
+  }
 }
 </style>

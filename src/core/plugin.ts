@@ -6,14 +6,29 @@ export function definePlugin<T extends Traits, C>(plugin: Plugin<T, C>): Plugin<
   return plugin;
 }
 
-/** Mount a plugin into a container and return a live view. The primary entry
- *  point for end-users — wraps `plugin.mount` with a cleaner call signature. */
+/**
+ * Mount a plugin and return a live view — the entry point for rendering any
+ * plugin. The runtime resolves `target` (a CSS selector or an element),
+ * validates the inputs, then invokes the plugin's `mount` hook. End users call
+ * `create`; they never call `plugin.mount` directly.
+ *
+ *   const view = create(gemPlugin, "#avatar", "alice");
+ *   const view = create(catPlugin, el, "alice", { config: { coat: { hue: constant(120) } } });
+ */
 export function create<T extends Traits, C>(
   plugin: Plugin<T, C>,
-  container: HTMLElement,
+  target: string | HTMLElement,
   seed: string,
   options?: CreateOptions,
 ): View<C> {
+  const container = typeof target === "string" ? document.querySelector(target) : target;
+  if (!(container instanceof HTMLElement)) {
+    const where = typeof target === "string" ? ` for selector "${target}"` : "";
+    throw new Error(`[seedstone] create(${plugin.id}): no container element found${where}.`);
+  }
+  if (typeof seed !== "string") {
+    throw new TypeError(`[seedstone] create(${plugin.id}): seed must be a string.`);
+  }
   return plugin.mount(container, seed, options);
 }
 

@@ -61,7 +61,11 @@ function gemSummary(config: unknown): Summary {
       { label: "IOR", pct: statPct(ior, 1.5, 2.8), value: ior.toFixed(2) },
       { label: "Fire", pct: Math.round(fire * 100), value: `${Math.round(fire * 100)}%` },
       { label: "Speed", pct: statPct(speed, 0.3, 2), value: `x${speed.toFixed(2)}` },
-      { label: "Perfection", pct: Math.round(perfection * 100), value: `${Math.round(perfection * 100)}%` },
+      {
+        label: "Perfection",
+        pct: Math.round(perfection * 100),
+        value: `${Math.round(perfection * 100)}%`,
+      },
     ],
   };
 }

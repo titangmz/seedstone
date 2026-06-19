@@ -1,13 +1,25 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onBeforeUnmount, useTemplateRef } from "vue";
-import type { View } from "seedstone";
+import { create, type View } from "seedstone";
 import { useLabState } from "~/composables/useLabState";
 
 useSeoMeta({ title: "Seedstone — Labs", robots: "noindex" });
 
 const containerRef = useTemplateRef<HTMLDivElement>("container");
 const { active } = useActivePlugin();
-const { sections, values, modes, changed, overrides, overridesCode, build, toggleMode, isParamDirty, resetAll, labelFor } = useLabState();
+const {
+  sections,
+  values,
+  modes,
+  changed,
+  overrides,
+  overridesCode,
+  build,
+  toggleMode,
+  isParamDirty,
+  resetAll,
+  labelFor,
+} = useLabState();
 
 const seed = ref("");
 const copied = ref(false);
@@ -31,7 +43,7 @@ function init(): void {
   build(active.value);
   loaded.value = true;
   const s = containerRef.value.clientWidth || 420;
-  mounted = active.value.plugin.mount(containerRef.value, seed.value.trim() || "seedstone", {
+  mounted = create(active.value.plugin, containerRef.value, seed.value.trim() || "seedstone", {
     width: s,
     height: s,
     background: null,
@@ -45,7 +57,9 @@ function onSeedInput(): void {
 async function copyCode(): Promise<void> {
   await navigator.clipboard.writeText(overridesCode.value);
   copied.value = true;
-  setTimeout(() => { copied.value = false; }, 1500);
+  setTimeout(() => {
+    copied.value = false;
+  }, 1500);
 }
 
 onMounted(() => {
@@ -57,7 +71,10 @@ onMounted(() => {
   ro.observe(containerRef.value!);
 });
 
-watch(() => active.value.plugin.id, () => init());
+watch(
+  () => active.value.plugin.id,
+  () => init(),
+);
 
 onBeforeUnmount(() => {
   clearTimeout(applyTimer);
@@ -84,7 +101,11 @@ onBeforeUnmount(() => {
         <div class="actions">
           <button class="btn ghost" :disabled="!changed.length" @click="resetAll">Reset</button>
           <button class="btn" :disabled="!changed.length" @click="copyCode">
-            {{ copied ? "Copied ✓" : `Copy ${changed.length} override${changed.length === 1 ? "" : "s"}` }}
+            {{
+              copied
+                ? "Copied ✓"
+                : `Copy ${changed.length} override${changed.length === 1 ? "" : "s"}`
+            }}
           </button>
         </div>
         <pre v-if="changed.length" class="diff">{{ overridesCode }}</pre>
@@ -115,15 +136,32 @@ onBeforeUnmount(() => {
                 <button
                   class="mode-toggle"
                   :class="modes[param.path]"
-                  :title="modes[param.path] === 'seeded' ? 'seed-driven — click to pin' : 'pinned — click to release'"
+                  :title="
+                    modes[param.path] === 'seeded'
+                      ? 'seed-driven — click to pin'
+                      : 'pinned — click to release'
+                  "
                   @click.prevent="toggleMode(param.path)"
                 >
                   {{ modes[param.path] === "seeded" ? "seeded" : "pin" }}
                 </button>
               </label>
               <template v-if="modes[param.path] === 'constant'">
-                <input :id="param.path" v-model.number="values[param.path]" type="range" :min="param.min" :max="param.max" :step="param.step" />
-                <input v-model.number="values[param.path]" type="number" :min="param.min" :max="param.max" :step="param.step" />
+                <input
+                  :id="param.path"
+                  v-model.number="values[param.path]"
+                  type="range"
+                  :min="param.min"
+                  :max="param.max"
+                  :step="param.step"
+                />
+                <input
+                  v-model.number="values[param.path]"
+                  type="number"
+                  :min="param.min"
+                  :max="param.max"
+                  :step="param.step"
+                />
               </template>
               <span v-else class="seeded-range">{{ param.min }} – {{ param.max }}</span>
             </template>
@@ -144,13 +182,28 @@ onBeforeUnmount(() => {
   padding: 88px 24px 80px;
 }
 
-.layout { display: flex; flex-direction: column; gap: 28px; }
+.layout {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
 @media (min-width: 900px) {
-  .layout { display: grid; grid-template-columns: 380px 1fr; align-items: start; }
-  .preview { position: sticky; top: 24px; }
+  .layout {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    align-items: start;
+  }
+  .preview {
+    position: sticky;
+    top: 24px;
+  }
 }
 
-.preview { display: flex; flex-direction: column; gap: 12px; }
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 
 .plugin-box {
   width: 100%;
@@ -160,8 +213,15 @@ onBeforeUnmount(() => {
   border: 1px solid var(--border);
   background: rgba(0, 0, 0, 0.25);
 }
-.plugin-box :deep(canvas) { width: 100% !important; height: 100% !important; }
-.plugin-box :deep(svg) { display: block; width: 100% !important; height: 100% !important; }
+.plugin-box :deep(canvas) {
+  width: 100% !important;
+  height: 100% !important;
+}
+.plugin-box :deep(svg) {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
 
 .seed-input {
   flex: 1;
@@ -174,7 +234,9 @@ onBeforeUnmount(() => {
   font-size: 0.9rem;
   outline: none;
 }
-.seed-input:focus { border-color: rgba(167, 139, 250, 0.6); }
+.seed-input:focus {
+  border-color: rgba(167, 139, 250, 0.6);
+}
 
 .btn {
   padding: 9px 16px;
@@ -187,12 +249,26 @@ onBeforeUnmount(() => {
   color: #fff;
   white-space: nowrap;
 }
-.btn:hover:not(:disabled) { opacity: 0.88; }
-.btn:disabled { opacity: 0.35; cursor: default; }
-.btn.ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+.btn:hover:not(:disabled) {
+  opacity: 0.88;
+}
+.btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.btn.ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
 
-.actions { display: flex; gap: 8px; }
-.actions .btn { flex: 1; }
+.actions {
+  display: flex;
+  gap: 8px;
+}
+.actions .btn {
+  flex: 1;
+}
 
 .diff {
   margin: 0;
@@ -208,9 +284,17 @@ onBeforeUnmount(() => {
   overflow: auto;
   white-space: pre;
 }
-.diff-empty { margin: 0; font-size: 0.78rem; color: rgba(255, 255, 255, 0.25); }
+.diff-empty {
+  margin: 0;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.25);
+}
 
-.params { display: flex; flex-direction: column; gap: 22px; }
+.params {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
 
 .group {
   background: var(--surface);
@@ -243,9 +327,15 @@ onBeforeUnmount(() => {
   color: rgba(255, 255, 255, 0.55);
   overflow: hidden;
 }
-.param.dirty label { color: var(--accent); }
+.param.dirty label {
+  color: var(--accent);
+}
 
-.param-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.param-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .mode-toggle {
   flex-shrink: 0;
@@ -260,11 +350,24 @@ onBeforeUnmount(() => {
   line-height: 1.5;
   transition: opacity 0.1s;
 }
-.mode-toggle.seeded { background: rgba(167, 139, 250, 0.15); border-color: rgba(167, 139, 250, 0.35); color: #a78bfa; }
-.mode-toggle.constant { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.3); }
-.mode-toggle:hover { opacity: 0.75; }
+.mode-toggle.seeded {
+  background: rgba(167, 139, 250, 0.15);
+  border-color: rgba(167, 139, 250, 0.35);
+  color: #a78bfa;
+}
+.mode-toggle.constant {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.3);
+}
+.mode-toggle:hover {
+  opacity: 0.75;
+}
 
-.param input[type="range"] { width: 100%; accent-color: #a78bfa; }
+.param input[type="range"] {
+  width: 100%;
+  accent-color: #a78bfa;
+}
 .param input[type="number"] {
   width: 100%;
   box-sizing: border-box;
@@ -277,9 +380,16 @@ onBeforeUnmount(() => {
   font-family: "Consolas", "SF Mono", monospace;
   outline: none;
 }
-.param input[type="number"]:focus { border-color: rgba(167, 139, 250, 0.6); }
+.param input[type="number"]:focus {
+  border-color: rgba(167, 139, 250, 0.6);
+}
 
-.seeded-range { grid-column: 2 / -1; font-size: 0.74rem; font-family: "Consolas", "SF Mono", monospace; color: rgba(255, 255, 255, 0.28); }
+.seeded-range {
+  grid-column: 2 / -1;
+  font-size: 0.74rem;
+  font-family: "Consolas", "SF Mono", monospace;
+  color: rgba(255, 255, 255, 0.28);
+}
 
 .pick-select {
   grid-column: 2 / -1;
@@ -294,11 +404,19 @@ onBeforeUnmount(() => {
   cursor: pointer;
   appearance: auto;
 }
-.pick-select:focus { border-color: rgba(167, 139, 250, 0.6); }
-.param.dirty .pick-select { border-color: rgba(167, 139, 250, 0.4); }
+.pick-select:focus {
+  border-color: rgba(167, 139, 250, 0.6);
+}
+.param.dirty .pick-select {
+  border-color: rgba(167, 139, 250, 0.4);
+}
 
 @media (max-width: 560px) {
-  .param { grid-template-columns: 1fr 80px; }
-  .param label { grid-column: 1 / -1; }
+  .param {
+    grid-template-columns: 1fr 80px;
+  }
+  .param label {
+    grid-column: 1 / -1;
+  }
 }
 </style>

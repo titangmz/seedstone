@@ -1,5 +1,12 @@
 import { ref, reactive, computed } from "vue";
-import { isSeeded, isConstant, isPick, type LabSlider, type LabOptions, type LabControls } from "seedstone";
+import {
+  isSeeded,
+  isConstant,
+  isPick,
+  type LabSlider,
+  type LabOptions,
+  type LabControls,
+} from "seedstone";
 import type { SitePlugin } from "~/plugins";
 
 export interface NumberParam extends LabSlider {
@@ -65,14 +72,34 @@ function collectParams(obj: unknown, lab: LabControls, path: string[] = []): Par
     const slider = entry && !Array.isArray(entry) ? entry : null;
     const min = slider?.min ?? obj.min;
     const max = slider?.max ?? obj.max;
-    return [{ kind: "number", path: dotted, mode: "seeded", min, max, step: (max - min) / 100, value: (obj.min + obj.max) / 2 }];
+    return [
+      {
+        kind: "number",
+        path: dotted,
+        mode: "seeded",
+        min,
+        max,
+        step: (max - min) / 100,
+        value: (obj.min + obj.max) / 2,
+      },
+    ];
   }
   if (isConstant(obj)) {
     if (typeof obj.value !== "number") return [];
     const entry = lab[dotted];
     const slider = entry && !Array.isArray(entry) ? entry : null;
     if (!slider) return [];
-    return [{ kind: "number", path: dotted, mode: "constant", min: slider.min, max: slider.max, step: (slider.max - slider.min) / 100, value: obj.value }];
+    return [
+      {
+        kind: "number",
+        path: dotted,
+        mode: "constant",
+        min: slider.min,
+        max: slider.max,
+        step: (slider.max - slider.min) / 100,
+        value: obj.value,
+      },
+    ];
   }
   if (isPick(obj)) {
     return [{ kind: "pick", path: dotted, options: obj.options(), value: SEED_DRIVEN }];
@@ -134,7 +161,11 @@ export function useLabState() {
   }
 
   function labelFor(path: string): string {
-    return path.split(".").at(-1)!.replace(/([A-Z])/g, " $1").toLowerCase();
+    return path
+      .split(".")
+      .at(-1)!
+      .replace(/([A-Z])/g, " $1")
+      .toLowerCase();
   }
 
   const changed = computed<Array<[string, unknown]>>(() => {
@@ -145,7 +176,8 @@ export function useLabState() {
         if (cur === "seeded") {
           if (cur !== defModes[path]) result.push([path, { kind: "seeded", ...ranges[path] }]);
         } else {
-          if (cur !== defModes[path] || values[path] !== defaults[path]) result.push([path, values[path]]);
+          if (cur !== defModes[path] || values[path] !== defaults[path])
+            result.push([path, values[path]]);
         }
       } else {
         if (values[path] !== defaults[path]) result.push([path, values[path]]);
@@ -163,12 +195,28 @@ export function useLabState() {
   const overridesCode = computed(() => {
     if (!changed.value.length) return "";
     const body = serializeOverrides(overrides.value);
-    const usesSeeded = changed.value.some(([, v]) => (v as Record<string, unknown>)?.kind === "seeded");
-    const usesPinned = changed.value.some(([, v]) => typeof v === "number" || typeof v === "string");
+    const usesSeeded = changed.value.some(
+      ([, v]) => (v as Record<string, unknown>)?.kind === "seeded",
+    );
+    const usesPinned = changed.value.some(
+      ([, v]) => typeof v === "number" || typeof v === "string",
+    );
     const fns = [usesSeeded && "seeded", usesPinned && "constant"].filter(Boolean).join(", ");
     const literal = `config: ${body}`;
     return fns ? `import { ${fns} } from 'seedstone'\n\n${literal}` : literal;
   });
 
-  return { sections, values, modes, changed, overrides, overridesCode, build, toggleMode, isParamDirty, resetAll, labelFor };
+  return {
+    sections,
+    values,
+    modes,
+    changed,
+    overrides,
+    overridesCode,
+    build,
+    toggleMode,
+    isParamDirty,
+    resetAll,
+    labelFor,
+  };
 }

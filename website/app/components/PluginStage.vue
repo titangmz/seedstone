@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from "vue";
-import type { View, Plugin } from "seedstone";
+import { create, type View, type Plugin } from "seedstone";
 
 const props = defineProps<{
   seed: string;
@@ -38,7 +38,7 @@ function mount(): void {
   destroy();
   loading.value = true;
   const s = size();
-  instance = props.plugin.mount(container, props.seed, {
+  instance = create(props.plugin, container, props.seed, {
     width: s,
     height: s,
     background: null,

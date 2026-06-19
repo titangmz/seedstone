@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, onMounted, watch } from "vue";
-import type { View } from "seedstone";
+import { create, type View } from "seedstone";
 
 const { active } = useActivePlugin();
 
@@ -65,7 +65,7 @@ function setupObserver(): void {
         if (!el.isConnected) return;
         const s = el.clientWidth || 104;
         thumbnails.push(
-          active.value.plugin.mount(el, el.dataset.ucSeed!, {
+          create(active.value.plugin, el, el.dataset.ucSeed!, {
             width: s,
             height: s,
             background: null,

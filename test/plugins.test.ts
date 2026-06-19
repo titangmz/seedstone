@@ -41,7 +41,9 @@ describe.each([
     for (const p of paths) {
       const control = plugin.lab?.[p];
       expect(control, `${plugin.id} missing lab.${p}`).toBeTruthy();
-      expect(Array.isArray(control), `${plugin.id} lab.${p} should be a slider, not array`).toBe(false);
+      expect(Array.isArray(control), `${plugin.id} lab.${p} should be a slider, not array`).toBe(
+        false,
+      );
     }
   });
 
@@ -51,7 +53,9 @@ describe.each([
     for (const p of paths) {
       const control = plugin.lab?.[p];
       expect(Array.isArray(control), `${plugin.id} missing dropdown for lab.${p}`).toBe(true);
-      expect((control as string[]).length, `${plugin.id} lab.${p} has no options`).toBeGreaterThan(0);
+      expect((control as string[]).length, `${plugin.id} lab.${p} has no options`).toBeGreaterThan(
+        0,
+      );
     }
   });
 
