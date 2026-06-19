@@ -19,8 +19,8 @@ const EAR_SHAPES = ["upright", "folded"] as const;
 export const meowtarTraits = {
   coat: {
     hue: seeded(0, 360),
-    saturation: seeded(0.34, 0.86),
-    lightness: seeded(0.46, 0.7),
+    saturation: seeded(0.48, 0.92),
+    lightness: seeded(0.5, 0.72),
     pattern: pick(() => [...PATTERNS]),
   },
 

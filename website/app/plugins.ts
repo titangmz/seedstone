@@ -83,17 +83,18 @@ function catSummary(config: unknown): Summary {
             value: `${Math.round(c.coat.hue)}deg`,
             pct: statPct(c.coat.hue, 0, 360),
           },
+          {
+            label: "Eyes",
+            value: `${Math.round(c.eyes.hue)}deg`,
+            pct: statPct(c.eyes.hue, 40, 210),
+          },
           { label: "Pattern", value: c.coat.pattern },
           { label: "Mood", value: c.mood },
+          { label: "Ears", value: c.ears.shape },
           {
             label: "Floof",
             value: `${Math.round(c.face.floof * 100)}%`,
             pct: Math.round(c.face.floof * 100),
-          },
-          {
-            label: "Whiskers",
-            value: `x${c.whiskers.spread.toFixed(2)}`,
-            pct: statPct(c.whiskers.spread, 0.82, 1.2),
           },
         ]
       : [],
