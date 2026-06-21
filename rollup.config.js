@@ -1,46 +1,14 @@
 import resolve from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
 import terser from "@rollup/plugin-terser";
-import fs from "node:fs";
-import path from "node:path";
+import { geometryGlob, banner } from "./build/geometry-glob.js";
 
-const banner = `/**
- * seedstone v1.0.0 — https://github.com/titangmz/seedstone
- * MIT License
- */`;
-
+// Legacy bundler — kept for now alongside Rolldown (the primary bundler) so the
+// two can be compared. Type declarations are produced separately by `tsc` (see
+// the `build:types` npm script), so the TypeScript plugin here only transpiles
+// — keeping this an apples-to-apples JavaScript-bundling comparison.
+//
 // Three.js is bundled into every output — no peer dependency required.
-function geometryGlob() {
-  return {
-    name: "geometry-glob",
-    transform(code, id) {
-      if (!id.endsWith(path.join("src", "plugins", "gem", "geometries", "index.ts"))) return null;
-
-      const globCall =
-        /import\.meta\.glob(?:<[^>]*>)?\(['"]\.\/\*\.ts['"],\s*\{\s*eager:\s*true,\s*import:\s*['"]default['"],\s*\}\)/m;
-      if (!globCall.test(code)) return null;
-
-      const dir = path.dirname(id);
-      const geometryFiles = fs
-        .readdirSync(dir)
-        .filter((file) => file.endsWith(".ts") && file !== "index.ts" && !file.endsWith(".d.ts"))
-        .sort();
-
-      const imports = geometryFiles
-        .map((file, index) => `import geometry${index} from './${file}';`)
-        .join("\n");
-      const registry = `{\n${geometryFiles
-        .map((file, index) => `  './${file}': geometry${index},`)
-        .join("\n")}\n}`;
-
-      return {
-        code: `${imports}\n${code.replace(globCall, registry)}`,
-        map: null,
-      };
-    },
-  };
-}
-
 const buildPlugins = (minify = false) => [
   geometryGlob(),
   resolve(),
