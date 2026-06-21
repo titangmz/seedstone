@@ -91,9 +91,7 @@ export function drawFox(canvas: Svg, cfg: FoxConfig): void {
     const p1y = e.ty + (e.oy - e.ty) * 0.4;
     const p2x = e.tx + (e.ix - e.tx) * 0.4;
     const p2y = e.ty + (e.iy - e.ty) * 0.4;
-    canvas
-      .polygon(`${r(e.tx)},${r(e.ty)} ${r(p1x)},${r(p1y)} ${r(p2x)},${r(p2y)}`)
-      .fill(p.dark);
+    canvas.polygon(`${r(e.tx)},${r(e.ty)} ${r(p1x)},${r(p1y)} ${r(p2x)},${r(p2y)}`).fill(p.dark);
   }
   if (ears.tuft >= 0.4) {
     const len = 7 + ears.tuft * 11;
@@ -155,7 +153,10 @@ export function drawFox(canvas: Svg, cfg: FoxConfig): void {
   canvas.path(mask).fill(p.belly);
 
   if (coat.pattern === "sooty") {
-    canvas.ellipse(hw * 0.8, 60).center(CX, snoutTopY + 8).fill({ color: p.ink, opacity: 0.26 });
+    canvas
+      .ellipse(hw * 0.8, 60)
+      .center(CX, snoutTopY + 8)
+      .fill({ color: p.ink, opacity: 0.26 });
   }
   if (coat.pattern === "masked") {
     for (const ex of [exL, exR]) {
@@ -167,7 +168,10 @@ export function drawFox(canvas: Svg, cfg: FoxConfig): void {
       const s = i < 7 ? -1 : 1;
       const cx = CX + s * (hw * 0.4 + rng() * hw * 0.3);
       const cy = cheekY + rng() * 34 - 6;
-      canvas.circle(2 + rng() * 2.4).center(cx, cy).fill({ color: p.ink, opacity: 0.5 });
+      canvas
+        .circle(2 + rng() * 2.4)
+        .center(cx, cy)
+        .fill({ color: p.ink, opacity: 0.5 });
     }
   }
 
@@ -178,7 +182,9 @@ export function drawFox(canvas: Svg, cfg: FoxConfig): void {
   const drawEye = (ex: number, s: 1 | -1, iris: string): void => {
     if (expression === "sleepy") {
       canvas
-        .path(`M ${r(ex - s * 14)},${r(eyeY - 1)} Q ${ex},${r(eyeY + 7)} ${r(ex + s * 15)},${r(eyeY - 8)}`)
+        .path(
+          `M ${r(ex - s * 14)},${r(eyeY - 1)} Q ${ex},${r(eyeY + 7)} ${r(ex + s * 15)},${r(eyeY - 8)}`,
+        )
         .fill("none")
         .stroke({ color: p.line, width: 3, linecap: "round" });
       return;
@@ -198,9 +204,18 @@ export function drawFox(canvas: Svg, cfg: FoxConfig): void {
       .stroke({ color: p.line, width: 1.6, linejoin: "round" });
     const prx = expression === "alert" ? 5.4 : 3.8;
     const pry = ((botY - topY) / 2) * 0.86;
-    canvas.ellipse(prx * 2, Math.max(prx * 2, pry * 2)).center(ex + s, eyeY).fill("#1a1422");
-    canvas.circle(5).center(ex - s * 4, topY + 4).fill({ color: "#ffffff", opacity: 0.95 });
-    canvas.circle(2.4).center(ex + s * 4, botY - 4).fill({ color: "#ffffff", opacity: 0.6 });
+    canvas
+      .ellipse(prx * 2, Math.max(prx * 2, pry * 2))
+      .center(ex + s, eyeY)
+      .fill("#1a1422");
+    canvas
+      .circle(5)
+      .center(ex - s * 4, topY + 4)
+      .fill({ color: "#ffffff", opacity: 0.95 });
+    canvas
+      .circle(2.4)
+      .center(ex + s * 4, botY - 4)
+      .fill({ color: "#ffffff", opacity: 0.6 });
   };
   drawEye(exL, -1, p.irisL);
   drawEye(exR, 1, p.irisR);
@@ -227,7 +242,9 @@ export function drawFox(canvas: Svg, cfg: FoxConfig): void {
   const my = noseY + 9;
   if (expression === "playful") {
     canvas
-      .path(`M ${CX},${r(my)} v3 M ${r(CX - 12)},${r(my + 3)} Q ${CX},${r(my + 16)} ${r(CX + 12)},${r(my + 3)} Z`)
+      .path(
+        `M ${CX},${r(my)} v3 M ${r(CX - 12)},${r(my + 3)} Q ${CX},${r(my + 16)} ${r(CX + 12)},${r(my + 3)} Z`,
+      )
       .fill("#b65a6e")
       .stroke({ color: p.line, width: 1.4, linejoin: "round" });
   } else {

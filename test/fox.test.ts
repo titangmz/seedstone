@@ -17,7 +17,7 @@ describe("fox", () => {
     expect(svg).toMatch(/<svg[\s>]/);
     expect(svg).toContain("</svg>");
     expect(svg).toContain("polygon"); // ears
-    expect(svg).toContain("viewBox=\"0 0 256 256\"");
+    expect(svg).toContain('viewBox="0 0 256 256"');
     expect(svg).not.toMatch(/NaN|undefined/);
   });
 

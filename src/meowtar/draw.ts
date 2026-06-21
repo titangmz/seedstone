@@ -169,7 +169,15 @@ export function drawCat(config: MeowtarConfig): string {
 
   const apert = clamp(eyes.aperture, 0.5, 1);
   const moodMul = (side: 1 | -1): number =>
-    mood === "wide" ? 1.18 : mood === "smug" ? 0.62 : mood === "derp" ? (side < 0 ? 1.12 : 0.68) : 1;
+    mood === "wide"
+      ? 1.18
+      : mood === "smug"
+        ? 0.62
+        : mood === "derp"
+          ? side < 0
+            ? 1.12
+            : 0.68
+          : 1;
 
   const eye = (ex: number, side: 1 | -1, iris: string): string => {
     if (mood === "sleepy") {

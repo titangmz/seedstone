@@ -17,7 +17,10 @@ export const foxPlugin = definePlugin<FoxTraits, FoxConfig>({
   traits: foxTraits,
   lab: buildLabControls(foxTraits),
   mount: (container, seed, options = {}): View<FoxConfig> => {
-    const canvas = SVG().addTo(container).viewbox(0, 0, 256, 256).attr({ width: "100%", height: "100%" });
+    const canvas = SVG()
+      .addTo(container)
+      .viewbox(0, 0, 256, 256)
+      .attr({ width: "100%", height: "100%" });
 
     let currentSeed = seed;
     let overrides = (options.config ?? {}) as FoxOverrides;
