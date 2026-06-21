@@ -7,7 +7,7 @@
  */
 
 import { SVG } from "@svgdotjs/svg.js";
-import { definePlugin, buildLabControls, type View } from "../core/index";
+import { definePlugin, buildLabControls, type View } from "../../core/index";
 import { foxTraits, resolveFox, type FoxTraits, type FoxOverrides } from "./config";
 import { drawFox, type FoxConfig } from "./draw";
 

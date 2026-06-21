@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { merge, derive } from "../core/index";
+import { merge, derive } from "../../core/index";
 import { gemTraits, type GemTraits, type GemConfig, type GemOverrides } from "./config";
 import { Environment } from "./environment";
 import { GemMesh } from "./mesh";

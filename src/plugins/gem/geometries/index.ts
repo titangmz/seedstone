@@ -4,9 +4,9 @@
  * HOW TO ADD A NEW CUT
  * ────────────────────
  * 1. Create `src/geometries/<name>.ts`
- * 2. Export a default object matching the `GemCutModule` contract:
+ * 2. Export a default object matching the `GemCutModule` contract (import that
+ *    type from this folder's index), e.g.:
  *
- *      import type { GemCutModule } from './index';
  *      const mod: GemCutModule = {
  *        name: 'mycut',
  *        build: () => { … return geometry; },

@@ -8,7 +8,15 @@
  * by editing its constructor.
  */
 
-import { seeded, pick, derive, merge, sampleUnit, type Config, type Override } from "../core/index";
+import {
+  seeded,
+  pick,
+  derive,
+  merge,
+  sampleUnit,
+  type Config,
+  type Override,
+} from "../../core/index";
 import { buildPalette } from "./palette";
 import { nameFor } from "./name";
 import type { FoxConfig } from "./draw";

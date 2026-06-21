@@ -44,19 +44,25 @@ export type {
 } from "./core/index";
 
 // Gem plugin
-export { gemPlugin, buildGeometry, listCuts } from "./gem/index";
-export type { GemConfig, GemTraits, GemOverrides, GemCut, GemCutModule } from "./gem/index";
+export { gemPlugin, buildGeometry, listCuts } from "./plugins/gem/index";
+export type { GemConfig, GemTraits, GemOverrides, GemCut, GemCutModule } from "./plugins/gem/index";
 
 // Meowtar plugin
-export { catPlugin, renderMeowtar } from "./meowtar/index";
+export { catPlugin, renderMeowtar } from "./plugins/meowtar/index";
 export type {
   MeowtarConfig,
   MeowtarTraits,
   MeowtarOverrides,
   MeowtarValues,
   Palette,
-} from "./meowtar/index";
+} from "./plugins/meowtar/index";
 
 // Fox plugin (SVG via svg.js)
-export { foxPlugin } from "./fox/index";
-export type { FoxConfig, FoxTraits, FoxOverrides, FoxValues, FoxPalette } from "./fox/index";
+export { foxPlugin } from "./plugins/fox/index";
+export type {
+  FoxConfig,
+  FoxTraits,
+  FoxOverrides,
+  FoxValues,
+  FoxPalette,
+} from "./plugins/fox/index";

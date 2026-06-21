@@ -5,7 +5,7 @@
  * classic fox contrast. Uses the core `hslToHex` primitive — no local maths.
  */
 
-import { hslToHex } from "../core/index";
+import { hslToHex } from "../../core/index";
 import type { FoxValues } from "./config";
 
 /** Every fill the drawing needs, as `#rrggbb` strings. */

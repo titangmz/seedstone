@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { gemPlugin } from "../src/gem/index";
-import { catPlugin } from "../src/meowtar/index";
-import { foxPlugin } from "../src/fox/index";
+import { gemPlugin } from "../src/plugins/gem/index";
+import { catPlugin } from "../src/plugins/meowtar/index";
+import { foxPlugin } from "../src/plugins/fox/index";
 import { isSeeded, isConstant, isPick } from "../src/core/index";
 
 /** Every numeric trait path (seeded, or constant with a number value). */

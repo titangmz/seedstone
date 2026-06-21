@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { mulberry32 } from "../core/index";
+import { mulberry32 } from "../../core/index";
 
 /** The slice of config a Sparkles shell needs. Self-contained — no gem coupling. */
 export interface SparklesConfig {

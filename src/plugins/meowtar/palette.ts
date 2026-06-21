@@ -5,7 +5,7 @@
  * reads correctly. Uses the core `hslToHex` primitive — no local colour maths.
  */
 
-import { hslToHex } from "../core/index";
+import { hslToHex } from "../../core/index";
 import type { MeowtarValues } from "./config";
 
 /** Every fill the drawing needs, as `#rrggbb` strings. */

@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { hslToHex } from "../core/index";
+import { hslToHex } from "../../core/index";
 import type { GemConfig } from "./config";
 
 /** Every value that affects the baked texture, joined into a comparable key.

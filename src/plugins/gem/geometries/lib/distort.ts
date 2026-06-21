@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { hash2D } from "../../../core/random";
+import { hash2D } from "../../../../core/random";
 
 // ── Tuning knobs ──────────────────────────────────────────────────────────────
 // Adjust these to change the range of distortion at perfection = 0.

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { renderFox } from "../src/fox/render";
-import { resolveFox, foxTraits } from "../src/fox/config";
+import { renderFox } from "../src/plugins/fox/render";
+import { resolveFox, foxTraits } from "../src/plugins/fox/config";
 import { constant } from "../src/core/index";
 
 describe("fox", () => {

@@ -4,7 +4,7 @@
  * exposed on the resolved config.
  */
 
-import { sampleUnit } from "../core/index";
+import { sampleUnit } from "../../core/index";
 
 const NAMES = [
   "Marmalade",

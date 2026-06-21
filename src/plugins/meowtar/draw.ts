@@ -12,7 +12,7 @@
  * per-cat id suffix so many inline cats can share a page without colliding.
  */
 
-import { mulberry32 } from "../core/index";
+import { mulberry32 } from "../../core/index";
 import type { MeowtarValues } from "./config";
 import type { Palette } from "./palette";
 

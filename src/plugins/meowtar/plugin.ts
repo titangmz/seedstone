@@ -1,4 +1,4 @@
-import { definePlugin, mountString, buildLabControls } from "../core/index";
+import { definePlugin, mountString, buildLabControls } from "../../core/index";
 import { meowtarTraits, resolveMeowtar, type MeowtarTraits, type MeowtarOverrides } from "./config";
 import { drawCat, type MeowtarConfig } from "./draw";
 

@@ -1,4 +1,4 @@
-import { buildLabControls, type LabControls } from "../core/index";
+import { buildLabControls, type LabControls } from "../../core/index";
 import { gemTraits } from "./config";
 
 const ranges = {

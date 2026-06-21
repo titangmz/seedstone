@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { constant } from "../src/core/index";
-import { renderMeowtar } from "../src/meowtar/index";
-import { resolveMeowtar, meowtarTraits } from "../src/meowtar/config";
+import { renderMeowtar } from "../src/plugins/meowtar/index";
+import { resolveMeowtar, meowtarTraits } from "../src/plugins/meowtar/config";
 
 describe("meowtar (core-only SVG cat)", () => {
   it("same seed always renders the same cat", () => {

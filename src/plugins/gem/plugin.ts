@@ -1,4 +1,4 @@
-import { definePlugin } from "../core/index";
+import { definePlugin } from "../../core/index";
 import { SeedstoneRenderer } from "./renderer";
 import { gemTraits, type GemTraits, type GemConfig, type GemOverrides } from "./config";
 import { gemLab } from "./lab";

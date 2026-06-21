@@ -10,7 +10,7 @@
  */
 
 import type { Svg } from "@svgdotjs/svg.js";
-import { mulberry32 } from "../core/index";
+import { mulberry32 } from "../../core/index";
 import type { FoxValues } from "./config";
 import type { Palette } from "./palette";
 

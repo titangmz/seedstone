@@ -12,7 +12,15 @@
  *   rates                              radians or cycles per second
  */
 
-import { constant, seeded, pick, derive, merge, type Config, type Override } from "../core/index";
+import {
+  constant,
+  seeded,
+  pick,
+  derive,
+  merge,
+  type Config,
+  type Override,
+} from "../../core/index";
 import { listCuts } from "./geometries/index";
 
 type Vec2 = [number, number];
