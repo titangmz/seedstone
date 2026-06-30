@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, onMounted, watch } from "vue";
-import { create, type View } from "seedstone";
+import { create } from "seedstone";
 
 const { active } = useActivePlugin();
 
@@ -45,11 +45,11 @@ seed: "Argoman Studio",
 title: "Communities & Brands",
 tag: "Groups & Organizations",
 desc: "Create recognizable visual identities for communities, DAOs, teams, companies, products, and online spaces.",
-},
+}
 ];
 
 
-const thumbnails: View[] = [];
+const thumbnails: Array<ReturnType<typeof create>> = [];
 let io: IntersectionObserver | null = null;
 
 function destroyThumbnails(): void {
@@ -105,22 +105,29 @@ onBeforeUnmount(() => {
 <template>
   <section id="cases" class="section-cases reveal">
     <div class="wrap">
-        <div class="sec-head">
-    <span class="eyebrow">
-      Popular use cases
-    </span>
+      <div class="sec-head">
+        <span class="eyebrow">Popular use cases</span>
 
-    <h2 class="sec-h2">
-      One digital identity engine.
-      <br />
-      Endless use cases.
-    </h2>
+        <h2 class="sec-h2">
+          One digital identity engine.
+          <br />
+          Endless use cases.
+        </h2>
 
-    <p class="sec-lede">
-      Generate unique gemstone-inspired avatars, NFT artwork, wallet identities,
-      AI agent profiles, and visual signatures from any string.
-    </p>
-  </div>
+        <p class="sec-lede">
+          Generate unique gemstone-inspired avatars, NFT artwork, wallet identities,
+          AI agent profiles, and visual signatures from any string.
+        </p>
+      </div>
+
+      <div class="uc-grid">
+        <article v-for="useCase in USE_CASES" :key="useCase.seed" class="uc">
+          <div class="ucg" :data-uc-seed="useCase.seed"></div>
+          <span class="uc-tag">{{ useCase.tag }}</span>
+          <h3>{{ useCase.title }}</h3>
+          <p>{{ useCase.desc }}</p>
+        </article>
+      </div>
     </div>
   </section>
 </template>
